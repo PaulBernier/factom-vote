@@ -1,0 +1,35 @@
+{
+    "name": "factom-vote",
+    "version": "0.0.1",
+    "description": "JS implementation of the Factom voting specification",
+    "main": "src/factom-vote.js",
+    "scripts": {
+        "lint": "eslint src/",
+        "test": "nyc --reporter=html --reporter=text mocha test/*.spec.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/PaulBernier/factom-vote.git"
+    },
+    "keywords": [
+        "factom",
+        "blockchain",
+        "vote",
+        "voting"
+    ],
+    "author": "Paul Bernier",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/PaulBernier/factom-vote/issues"
+    },
+    "homepage": "https://github.com/PaulBernier/factom-vote#readme",
+    "dependencies": {
+        "factom": "0.2.6"
+    },
+    "devDependencies": {
+        "chai": "^4.1.2",
+        "eslint": "^5.3.0",
+        "mocha": "^5.2.0",
+        "nyc": "^12.0.2"
+    }
+}
