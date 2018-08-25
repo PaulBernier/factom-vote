@@ -1,0 +1,30 @@
+{
+    "proposal": {
+        "title": "Is the on-chain voting grant a success?",
+        "text": "Please tell if you think this grant was a success",
+        "externalText": {
+            "href": "https://the-voting-grant/vote",
+            "hash": {
+                "value": "b950beb02d45cc9c96c198243af669b3dc57d31de994d655f506372fdec3a885",
+                "algo": "sha512"
+            }
+        }
+    },
+    "vote": {
+        "commitStartBlockHeight": 1000,
+        "commitEndBlockHeight": 2000,
+        "revealStartBlockHeight": 2001,
+        "revealEndBlockHeight": 3000,
+        "participantsChainId": "a480ac008425c12c6cc0aae11c391ff0152c508a05996dfb2e1cdb1c17c73775",
+        "type": 0,
+        "config": {
+            "options": ["yes", "no", "maybe"],
+            "acceptanceCriteria": {
+                "minimumTurnout": 0.5,
+                "minimumSupport": 0.6,
+                "weighted": true
+            }
+        },
+        "allowVoteOverwrite": true
+    }
+}

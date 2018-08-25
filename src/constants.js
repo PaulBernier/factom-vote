@@ -1,0 +1,5 @@
+const MAIN_VOTE_REGISTRATION_CHAIN_ID = '';
+
+module.exports = {
+    MAIN_VOTE_REGISTRATION_CHAIN_ID
+};
