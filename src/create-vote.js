@@ -45,11 +45,13 @@ function generateAppendParticipantsEntry(participants, participantsChainId, admi
     // TODO: same validation for voters
     const keyPair = getKeyPair(administratorSecretKey);
 
+    const nonce = Buffer.from(nacl.randomBytes(32));
     const content = Buffer.from(JSON.stringify(participants), 'utf8');
-    const signature = sign.detached(Buffer.concat([Buffer.from(participantsChainId, 'hex'), content]), keyPair.secretKey);
+    const signature = sign.detached(Buffer.concat([Buffer.from(participantsChainId, 'hex'), nonce, content]), keyPair.secretKey);
 
     return Entry.builder()
         .chainId(participantsChainId)
+        .extId(nonce)
         .extId(signature)
         .content(content, 'utf8')
         .build();
