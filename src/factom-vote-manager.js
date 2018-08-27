@@ -13,21 +13,18 @@ class FactomVoteManager {
     }
 
     async createVoteRegistrationChain(ecAddress, nonce) {
-        // TODO
-        // const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
-        return createVoteRegistrationChain(this.cli, nonce, ecAddress);
+        const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
+        return createVoteRegistrationChain(this.cli, nonce, ecPrivateAddress);
     }
 
     async createVote(voteData, ecAddress) {
-        // TODO
-        // const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
-        return createVote(this.cli, voteData, ecAddress);
+        const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
+        return createVote(this.cli, voteData, ecPrivateAddress);
     }
 
     async appendParticipants(addParticipantsData, ecAddress) {
-        // TODO
-        // const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
-        return appendParticipants(this.cli, addParticipantsData, ecAddress);
+        const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
+        return appendParticipants(this.cli, addParticipantsData, ecPrivateAddress);
     }
 
     async removeParticipants(participantsChainId, participants) {
@@ -39,15 +36,13 @@ class FactomVoteManager {
     }
 
     async commitVote(vote, voter, ecAddress) {
-        // TODO
-        // const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
-        return commitVote(this.cli, vote, voter, ecAddress);
+        const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
+        return commitVote(this.cli, vote, voter, ecPrivateAddress);
     }
 
     async revealVote(vote, voter, ecAddress) {
-        // TODO
-        // const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
-        return revealVote(this.cli, vote, voter, ecAddress);
+        const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
+        return revealVote(this.cli, vote, voter, ecPrivateAddress);
     }
 
 }
