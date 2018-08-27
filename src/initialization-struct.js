@@ -1,5 +1,6 @@
-const { Entry, Chain } = require('factom');
-const nacl = require('tweetnacl/nacl-fast');
+const { Chain } = require('factom/src/chain'),
+    { Entry } = require('factom/src/entry'),
+    nacl = require('tweetnacl/nacl-fast');
 
 function generateVoteRegistrationChain(n) {
     const nonce = n ? Buffer.from(n, 'hex') : nacl.randomBytes(32);

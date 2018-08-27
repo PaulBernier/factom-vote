@@ -1,5 +1,6 @@
 const // TODO: replace by factom-struct
-    { Entry, Chain } = require('factom'),
+    { Chain } = require('factom/src/chain'),
+    { Entry } = require('factom/src/entry'),
     nacl = require('tweetnacl/nacl-fast'),
     sign = nacl.sign,
     { getKeyPair } = require('./crypto');
