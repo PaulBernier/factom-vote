@@ -1,6 +1,4 @@
-// TODO: useless stable?
-const stringify = require('json-stable-stringify'),
-    // TODO: replace by factom-struct
+const // TODO: replace by factom-struct
     { Entry, Chain, getPublicAddress } = require('factom'),
     nacl = require('tweetnacl/nacl-fast'),
     sign = nacl.sign;
@@ -10,7 +8,7 @@ function generateVoteChainFirstEntry(vote, administrator) {
     //validateVoteDefinition(vote);
 
     const keyPair = getKeyPair(administrator.secretKey);
-    const content = Buffer.from(stringify(vote), 'utf8');
+    const content = Buffer.from(JSON.stringify(vote), 'utf8');
 
     const signature = sign.detached(content, keyPair.secretKey);
 
@@ -29,7 +27,7 @@ function generateVoteParticipantsChainFirstEntry(participants, administrator) {
     const keyPair = getKeyPair(administrator.secretKey);
     const nonce = nacl.randomBytes(32);
 
-    const content = Buffer.from(stringify(participants), 'utf8');
+    const content = Buffer.from(JSON.stringify(participants), 'utf8');
     const signature = sign.detached(Buffer.concat([nonce, content]), keyPair.secretKey);
 
     return Entry.builder()
@@ -47,7 +45,7 @@ function generateAppendParticipantsEntry(participants, participantsChainId, admi
     // TODO: same validation for voters
     const keyPair = getKeyPair(administratorSecretKey);
 
-    const content = Buffer.from(stringify(participants), 'utf8');
+    const content = Buffer.from(JSON.stringify(participants), 'utf8');
     const signature = sign.detached(Buffer.concat([Buffer.from(participantsChainId, 'hex'), content]), keyPair.secretKey);
 
     return Entry.builder()

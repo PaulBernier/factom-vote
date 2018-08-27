@@ -26,7 +26,6 @@
     "dependencies": {
         "factom": "0.2.6",
         "hash.js": "^1.1.5",
-        "json-stable-stringify": "^1.0.1",
         "tweetnacl": "^1.0.0"
     },
     "devDependencies": {
