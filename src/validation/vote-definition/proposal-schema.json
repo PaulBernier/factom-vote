@@ -1,0 +1,63 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "vote-definition/proposal",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "title"
+    ],
+    "anyOf": [
+        {
+            "required": [
+                "text"
+            ]
+        },
+        {
+            "required": [
+                "externalRef"
+            ]
+        }
+    ],
+    "properties": {
+        "title": {
+            "type": "string"
+        },
+        "text": {
+            "type": "string"
+        },
+        "externalRef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "href",
+                "hash"
+            ],
+            "properties": {
+                "href": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "hash": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "value",
+                        "algo"
+                    ],
+                    "properties": {
+                        "value": {
+                            "type": "string"
+                        },
+                        "algo": {
+                            "enum": [
+                                "sha1",
+                                "sha256",
+                                "sha512"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

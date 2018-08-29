@@ -1,0 +1,111 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "vote-definition/vote",
+    "type": "object",
+    "required": [
+        "commitStartBlockHeight",
+        "commitEndBlockHeight",
+        "revealStartBlockHeight",
+        "revealEndBlockHeight",
+        "participantsChainId",
+        "type",
+        "config"
+    ],
+    "additionalProperties": false,
+    "oneOf": [
+        {
+            "properties": {
+                "type": {
+                    "enum": [
+                        0,
+                        1
+                    ]
+                },
+                "config": {
+                    "additionalProperties": false,
+                    "required": [
+                        "options"
+                    ],
+                    "properties": {
+                        "options": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "minOptions": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "maxOptions": {
+                            "type": "integer",
+                            "minimum": {
+                                "$data": "1/minOptions"
+                            },
+                            "maximum": {
+                                "$data": "1/options/length"
+                            }
+                        },
+                        "acceptanceCriteria": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "minTurnout": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1
+                                },
+                                "minSupport": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1
+                                },
+                                "weighted": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "properties": {
+        "commitStartBlockHeight": {
+            "type": "number",
+            "minimum": 0
+        },
+        "commitEndBlockHeight": {
+            "type": "number",
+            "minimum": {
+                "$data": "1/commitStartBlockHeight"
+            }
+        },
+        "revealStartBlockHeight": {
+            "type": "number",
+            "minimum": {
+                "$data": "1/commitEndBlockHeight"
+            }
+        },
+        "revealEndBlockHeight": {
+            "type": "number",
+            "minimum": {
+                "$data": "1/revealStartBlockHeight"
+            }
+        },
+        "participantsChainId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+        },
+        "type": {
+            "type": "integer"
+        },
+        "config": {
+            "type": "object"
+        },
+        "allowVoteOverwrite": {
+            "type": "boolean"
+        }
+    }
+}

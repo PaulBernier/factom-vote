@@ -1,12 +1,14 @@
 const { Chain } = require('factom/src/chain'),
+    { validateVoteDefinition } = require('./validation/json-validation'),
     { Entry } = require('factom/src/entry'),
     nacl = require('tweetnacl/nacl-fast'),
     sign = nacl.sign,
     { getKeyPair } = require('./crypto');
 
 function generateVoteChain(vote, administrator) {
-    // TODO
-    //validateVoteDefinition(vote);
+    if (!validateVoteDefinition(vote)) {
+        throw new Error(JSON.stringify(validateVoteDefinition.errors));
+    }
 
     const keyPair = getKeyPair(administrator.secretKey);
     const content = Buffer.from(JSON.stringify(vote), 'utf8');

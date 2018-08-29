@@ -1,0 +1,14 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Factom on-chain vote initiation schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "vote",
+        "proposal"
+    ],
+    "properties": {
+        "proposal": { "$ref": "vote-definition/proposal" },
+        "vote": { "$ref": "vote-definition/vote" }
+    }
+}
