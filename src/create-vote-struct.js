@@ -60,21 +60,12 @@ function generateAppendParticipantsEntry(participants, participantsChainId, admi
         .build();
 }
 
-function generateVoteRegistrationEntry(registrationChainId, voteChainId, administrator) {
-    const keyPair = getKeyPair(administrator.secretKey);
-
-    const extIds = [
-        Buffer.from('Register Factom Vote', 'utf8'),
-        Buffer.from(voteChainId, 'hex'),
-        Buffer.from(keyPair.publicKey)
-    ];
-
-    const signature = sign.detached(Buffer.concat(extIds), keyPair.secretKey);
-    extIds.push(signature);
+function generateVoteRegistrationEntry(registrationChainId, voteChainId) {
 
     return Entry.builder()
         .chainId(registrationChainId)
-        .extIds(extIds)
+        .extId(Buffer.from('Register Factom Vote', 'utf8'))
+        .extId(Buffer.from(voteChainId, 'hex'))
         .build();
 }
 

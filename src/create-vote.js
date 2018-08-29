@@ -12,7 +12,7 @@ async function createVote(cli, voteData, ecPrivateKey) {
     const participantsChain = generateVoteParticipantsChain(participants, administrator);
     definition.vote.participantsChainId = participantsChain.idHex;
     const voteChain = generateVoteChain(definition, administrator);
-    const registrationEntry = generateVoteRegistrationEntry(registrationChainId, voteChain.id, administrator);
+    const registrationEntry = generateVoteRegistrationEntry(registrationChainId, voteChain.id);
 
     const ecCost = participantsChain.ecCost() + voteChain.ecCost() + registrationEntry.ecCost();
     await validateFunds(cli, ecCost, ecPrivateKey, 'Cannot create vote');
