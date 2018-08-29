@@ -27,12 +27,8 @@ class FactomVoteManager {
         return appendParticipants(this.cli, addParticipantsData, ecPrivateAddress);
     }
 
-    async removeParticipants(participantsChainId, participants) {
-        // ?
-    }
-
-    async getVote(voteChainId) {
-
+    async getVote() {
+        // TODO
     }
 
     async commitVote(vote, voter, ecAddress) {

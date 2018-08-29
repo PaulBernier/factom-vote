@@ -9,7 +9,7 @@ const { getPublicAddress } = require('factom'),
 async function createVote(cli, voteData, ecPrivateKey) {
     const { definition, registrationChainId, participants, administrator } = voteData;
 
-    const participantsChain = generateVoteParticipantsChain(participants, administrator);
+    const participantsChain = generateVoteParticipantsChain(participants || [], administrator);
     definition.vote.participantsChainId = participantsChain.idHex;
     const voteChain = generateVoteChain(definition, administrator);
     const registrationEntry = generateVoteRegistrationEntry(registrationChainId, voteChain.id);

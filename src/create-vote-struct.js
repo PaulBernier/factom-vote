@@ -1,6 +1,6 @@
-const { Chain } = require('factom/src/chain'),
+const { Chain, composeChain } = require('factom/src/chain'),
     { validateVoteDefinition } = require('./validation/json-validation'),
-    { Entry } = require('factom/src/entry'),
+    { Entry, composeEntry } = require('factom/src/entry'),
     nacl = require('tweetnacl/nacl-fast'),
     sign = nacl.sign,
     { getKeyPair } = require('./crypto');
@@ -69,9 +69,38 @@ function generateVoteRegistrationEntry(registrationChainId, voteChainId) {
         .build();
 }
 
+////////////////////////////
+
+function composeVoteChain(vote, administrator, ecPrivateAddress) {
+    return composeHex(composeChain(generateVoteChain(vote, administrator), ecPrivateAddress));
+}
+
+function composeVoteRegistrationEntry(registrationChainId, voteChainId, ecPrivateAddress) {
+    return composeHex(composeEntry(generateVoteRegistrationEntry(registrationChainId, voteChainId), ecPrivateAddress));
+}
+
+function composeVoteParticipantsChain(participants, administrator, ecPrivateAddress) {
+    return composeHex(composeChain(generateVoteParticipantsChain(participants, administrator), ecPrivateAddress));
+}
+
+function composeAppendParticipantsEntry(participants, participantsChainId, administratorSecretKey, ecPrivateAddress) {
+    return composeHex(composeEntry(generateAppendParticipantsEntry(participants, participantsChainId, administratorSecretKey), ecPrivateAddress));
+}
+
+function composeHex(compose) {
+    return {
+        commit: compose.commit.toString('hex'),
+        reveal: compose.reveal.toString('hex')
+    };
+}
+
 module.exports = {
     generateVoteRegistrationEntry,
     generateVoteChain,
     generateVoteParticipantsChain,
-    generateAppendParticipantsEntry
+    generateAppendParticipantsEntry,
+    composeVoteRegistrationEntry,
+    composeVoteChain,
+    composeVoteParticipantsChain,
+    composeAppendParticipantsEntry
 };

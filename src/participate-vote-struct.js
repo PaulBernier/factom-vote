@@ -1,4 +1,4 @@
-const { Entry } = require('factom/src/entry'),
+const { Entry, composeEntry } = require('factom/src/entry'),
     hash = require('hash.js'),
     sign = require('tweetnacl/nacl-fast').sign,
     { validateVote } = require('./validation/json-validation'),
@@ -53,8 +53,27 @@ function generateVoteRevealEntry(vote, voter) {
         .build();
 }
 
+///////////////////
+
+function composeVoteCommitEntry(vote, voter, ecPrivateAddress) {
+    return composeHex(composeEntry(generateVoteCommitEntry(vote, voter), ecPrivateAddress));
+}
+
+function composeVoteRevealEntry(vote, voter, ecPrivateAddress) {
+    return composeHex(composeEntry(generateVoteRevealEntry(vote, voter), ecPrivateAddress));
+}
+
+function composeHex(compose) {
+    return {
+        commit: compose.commit.toString('hex'),
+        reveal: compose.reveal.toString('hex')
+    };
+}
+
 
 module.exports = {
     generateVoteCommitEntry,
-    generateVoteRevealEntry
+    generateVoteRevealEntry,
+    composeVoteCommitEntry,
+    composeVoteRevealEntry
 };
