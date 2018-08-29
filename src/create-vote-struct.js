@@ -7,7 +7,7 @@ const { Chain } = require('factom/src/chain'),
 
 function generateVoteChain(vote, administrator) {
     if (!validateVoteDefinition(vote)) {
-        throw new Error(JSON.stringify(validateVoteDefinition.errors));
+        throw new Error('Vote definition validation error:\n' + JSON.stringify(validateVoteDefinition.errors));
     }
 
     const keyPair = getKeyPair(administrator.secretKey);

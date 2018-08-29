@@ -1,10 +1,13 @@
 const { Entry } = require('factom/src/entry'),
     hash = require('hash.js'),
     sign = require('tweetnacl/nacl-fast').sign,
+    { validateVote } = require('./validation/json-validation'),
     { getKeyPair } = require('./crypto');
 
 function generateVoteCommitEntry(vote, voter) {
-    // TODO: Validate vote ADJ
+    if (!validateVote(vote)) {
+        throw new Error('Vote validation error:\n' + JSON.stringify(validateVote.errors));
+    }
 
     const voted = Buffer.concat(vote.vote.sort().map(choice => Buffer.from(choice, 'utf8')));
     const commit = hash.hmac(hash[vote.hmacAlgo], Buffer.from(vote.secret, 'hex')).update(voted).digest('hex');
@@ -26,7 +29,9 @@ function generateVoteCommitEntry(vote, voter) {
 
 
 function generateVoteRevealEntry(vote, voter) {
-    // TODO: Validate vote ADJ with same schema
+    if (!validateVote(vote)) {
+        throw new Error('Vote validation error:\n' + JSON.stringify(validateVote.errors));
+    }
 
     const content = Buffer.from(JSON.stringify({
         vote: vote.vote,
