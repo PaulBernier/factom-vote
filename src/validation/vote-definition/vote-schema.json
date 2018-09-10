@@ -73,23 +73,23 @@
     ],
     "properties": {
         "commitStartBlockHeight": {
-            "type": "number",
+            "type": "integer",
             "minimum": 0
         },
         "commitEndBlockHeight": {
-            "type": "number",
+            "type": "integer",
             "minimum": {
                 "$data": "1/commitStartBlockHeight"
             }
         },
         "revealStartBlockHeight": {
-            "type": "number",
+            "type": "integer",
             "minimum": {
                 "$data": "1/commitEndBlockHeight"
             }
         },
         "revealEndBlockHeight": {
-            "type": "number",
+            "type": "integer",
             "minimum": {
                 "$data": "1/revealStartBlockHeight"
             }

@@ -1,5 +1,5 @@
 const { Chain, composeChain } = require('factom/src/chain'),
-    { validateVoteDefinition } = require('./validation/json-validation'),
+    { validateVoteDefinition, validateParticipants } = require('./validation/json-validation'),
     { Entry, composeEntry } = require('factom/src/entry'),
     nacl = require('tweetnacl/nacl-fast'),
     sign = nacl.sign,
@@ -29,7 +29,10 @@ function generateVoteChain(vote, administrator) {
 
 function generateVoteParticipantsChain(participants, administrator) {
     // TODO: handle long list of voters (split the JSON)
-    // TODO: validate voters
+    if (!validateParticipants(participants)) {
+        throw new Error('Vote participants validation error:\n' + JSON.stringify(validateParticipants.errors));
+    }
+
     const keyPair = getKeyPair(administrator.secretKey);
     const nonce = nacl.randomBytes(NONCE_SIZE);
 
@@ -48,7 +51,10 @@ function generateVoteParticipantsChain(participants, administrator) {
 
 function generateAppendParticipantsEntry(participants, participantsChainId, administratorSecretKey) {
     // TODO: handle long list of voters (split the JSON)
-    // TODO: same validation for voters
+    if (!validateParticipants(participants)) {
+        throw new Error('Vote participants validation error:\n' + JSON.stringify(validateParticipants.errors));
+    }
+    
     const keyPair = getKeyPair(administratorSecretKey);
 
     const nonce = Buffer.from(nacl.randomBytes(NONCE_SIZE));
