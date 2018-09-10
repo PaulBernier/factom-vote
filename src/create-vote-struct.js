@@ -5,6 +5,8 @@ const { Chain, composeChain } = require('factom/src/chain'),
     sign = nacl.sign,
     { getKeyPair } = require('./crypto');
 
+const NONCE_SIZE = 32;
+
 function generateVoteChain(vote, administrator) {
     if (!validateVoteDefinition(vote)) {
         throw new Error('Vote definition validation error:\n' + JSON.stringify(validateVoteDefinition.errors));
@@ -26,9 +28,10 @@ function generateVoteChain(vote, administrator) {
 }
 
 function generateVoteParticipantsChain(participants, administrator) {
+    // TODO: handle long list of voters (split the JSON)
     // TODO: validate voters
     const keyPair = getKeyPair(administrator.secretKey);
-    const nonce = nacl.randomBytes(32);
+    const nonce = nacl.randomBytes(NONCE_SIZE);
 
     const content = Buffer.from(JSON.stringify(participants), 'utf8');
     const signature = sign.detached(Buffer.concat([nonce, content]), keyPair.secretKey);
@@ -48,7 +51,7 @@ function generateAppendParticipantsEntry(participants, participantsChainId, admi
     // TODO: same validation for voters
     const keyPair = getKeyPair(administratorSecretKey);
 
-    const nonce = Buffer.from(nacl.randomBytes(32));
+    const nonce = Buffer.from(nacl.randomBytes(NONCE_SIZE));
     const content = Buffer.from(JSON.stringify(participants), 'utf8');
     const signature = sign.detached(Buffer.concat([Buffer.from(participantsChainId, 'hex'), nonce, content]), keyPair.secretKey);
 

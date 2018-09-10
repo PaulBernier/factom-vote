@@ -28,7 +28,7 @@
     },
     "homepage": "https://github.com/PaulBernier/factom-vote#readme",
     "dependencies": {
-        "factom": "0.3.0",
+        "factom": "0.3.2",
         "hash.js": "^1.1.5",
         "tweetnacl": "^1.0.0"
     },
