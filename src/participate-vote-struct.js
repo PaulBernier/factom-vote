@@ -10,8 +10,8 @@ function generateVoteCommitEntry(vote, voter) {
     }
 
     const voted = Buffer.concat(vote.vote.sort().map(choice => Buffer.from(choice, 'utf8')));
-    const commit = hash.hmac(hash[vote.hmacAlgo], Buffer.from(vote.secret, 'hex')).update(voted).digest('hex');
-    const content = Buffer.from(JSON.stringify({ commit }));
+    const commitment = hash.hmac(hash[vote.hmacAlgo], Buffer.from(vote.secret, 'hex')).update(voted).digest('hex');
+    const content = Buffer.from(JSON.stringify({ commitment }));
 
     const keyPair = getKeyPair(voter.secretKey);
     const voteChainId = Buffer.from(vote.voteChainId, 'hex');
