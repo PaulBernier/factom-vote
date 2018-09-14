@@ -27,7 +27,7 @@ describe('Participate in vote structures', function () {
 
         const publicKey = sign.keyPair.fromSeed(Buffer.from(voter.secretKey, 'hex')).publicKey;
         assert.deepEqual(entry.extIds[2], publicKey);
-        const hmac = hash.hmac(hash.sha512, Buffer.from(vote.secret, 'hex')).update(Buffer.from('MaybeYes')).digest('hex');
+        const hmac = hash.hmac(hash.sha512, Buffer.from(vote.secret, 'hex')).update(Buffer.from('YesMaybe')).digest('hex');
 
         const dataSigned = Buffer.concat([Buffer.from('c71a06c108fccb7bf4d4737dfa5c51371c5845c9598a06e1203f465c247d51a6', 'hex'), entry.content]);
         assert.isTrue(sign.detached.verify(dataSigned, entry.extIds[3], publicKey));

@@ -9,7 +9,7 @@ function generateVoteCommitEntry(vote, voter) {
         throw new Error('Vote validation error:\n' + JSON.stringify(validateVote.errors));
     }
 
-    const voted = Buffer.concat(vote.vote.sort().map(choice => Buffer.from(choice, 'utf8')));
+    const voted = Buffer.concat(vote.vote.map(choice => Buffer.from(choice, 'utf8')));
     const commitment = hash.hmac(hash[vote.hmacAlgo], Buffer.from(vote.secret, 'hex')).update(voted).digest('hex');
     const content = Buffer.from(JSON.stringify({ commitment }));
 
