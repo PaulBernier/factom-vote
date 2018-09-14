@@ -5,7 +5,7 @@ const { Chain } = require('factom/src/chain'),
 function generateVoteRegistrationChain(n) {
     const nonce = n ? Buffer.from(n, 'hex') : nacl.randomBytes(32);
     const entry = Entry.builder()
-        .extId('Factom Vote Registration Chain', 'utf8')
+        .extId('factom-vote-registration', 'utf8')
         .extId(nonce)
         .content('This is the Factom Vote Registration Chain. It holds pointers to the individual vote chains.', 'utf8')
         .build();
