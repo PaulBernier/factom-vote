@@ -3,10 +3,7 @@
     "$id": "vote-definition/vote",
     "type": "object",
     "required": [
-        "commitStartBlockHeight",
-        "commitEndBlockHeight",
-        "revealStartBlockHeight",
-        "revealEndBlockHeight",
+        "phasesBlockHeights",
         "participantsChainId",
         "type",
         "config"
@@ -72,26 +69,38 @@
         }
     ],
     "properties": {
-        "commitStartBlockHeight": {
-            "type": "integer",
-            "minimum": 0
-        },
-        "commitEndBlockHeight": {
-            "type": "integer",
-            "minimum": {
-                "$data": "1/commitStartBlockHeight"
-            }
-        },
-        "revealStartBlockHeight": {
-            "type": "integer",
-            "minimum": {
-                "$data": "1/commitEndBlockHeight"
-            }
-        },
-        "revealEndBlockHeight": {
-            "type": "integer",
-            "minimum": {
-                "$data": "1/revealStartBlockHeight"
+        "phasesBlockHeights": {
+            "type": "object",
+            "required": [
+                "commitStart",
+                "commitEnd",
+                "revealStart",
+                "revealEnd"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "commitStart": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "commitEnd": {
+                    "type": "integer",
+                    "minimum": {
+                        "$data": "1/commitStartBlockHeight"
+                    }
+                },
+                "revealStart": {
+                    "type": "integer",
+                    "minimum": {
+                        "$data": "1/commitEndBlockHeight"
+                    }
+                },
+                "revealEnd": {
+                    "type": "integer",
+                    "minimum": {
+                        "$data": "1/revealStartBlockHeight"
+                    }
+                }
             }
         },
         "participantsChainId": {
