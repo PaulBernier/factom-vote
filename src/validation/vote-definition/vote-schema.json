@@ -48,18 +48,25 @@
                             "type": "object",
                             "additionalProperties": false,
                             "properties": {
-                                "minTurnout": {
+                                "weightedMinSupport": {
                                     "type": "number",
                                     "minimum": 0,
                                     "maximum": 1
                                 },
-                                "minSupport": {
+                                "unweightedMinSupport": {
                                     "type": "number",
                                     "minimum": 0,
                                     "maximum": 1
                                 },
-                                "weighted": {
-                                    "type": "boolean"
+                                "weightedMinTurnout": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1
+                                },
+                                "unweightedMinTurnout": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1
                                 }
                             }
                         }
