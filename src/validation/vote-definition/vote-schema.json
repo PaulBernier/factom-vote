@@ -8,15 +8,30 @@
         "type",
         "config"
     ],
+    "definitions": {
+        "weightedUnweighted": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "weighted": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "unweighted": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                }
+            }
+        }
+    },
     "additionalProperties": false,
     "oneOf": [
         {
             "properties": {
                 "type": {
-                    "enum": [
-                        0,
-                        1
-                    ]
+                    "const": 0
                 },
                 "config": {
                     "additionalProperties": false,
@@ -48,25 +63,16 @@
                             "type": "object",
                             "additionalProperties": false,
                             "properties": {
-                                "weightedMinSupport": {
-                                    "type": "number",
-                                    "minimum": 0,
-                                    "maximum": 1
+                                "minTurnout": {
+                                    "$ref": "#/definitions/weightedUnweighted"
                                 },
-                                "unweightedMinSupport": {
-                                    "type": "number",
-                                    "minimum": 0,
-                                    "maximum": 1
-                                },
-                                "weightedMinTurnout": {
-                                    "type": "number",
-                                    "minimum": 0,
-                                    "maximum": 1
-                                },
-                                "unweightedMinTurnout": {
-                                    "type": "number",
-                                    "minimum": 0,
-                                    "maximum": 1
+                                "minSupport": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                        ".*": {
+                                            "$ref": "#/definitions/weightedUnweighted"
+                                        }
+                                    }
                                 }
                             }
                         }

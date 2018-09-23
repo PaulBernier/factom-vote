@@ -28,10 +28,19 @@
             "minOptions": 1,
             "maxOptions": 1,
             "acceptanceCriteria": {
-                "weightedMinTurnout": 0.5,
-                "unweightedMinTurnout": 0.3,
-                "weightedMinSupport": 0.6,
-                "unweightedMinSupport": 0.8
+                "minTurnout": {
+                    "weighted": 0.3,
+                    "unweighted": 0.5
+                },
+                "minSupport": {
+                    "yes": {
+                        "weighted": 0.6,
+                        "unweighted": 0.9
+                    },
+                    "no": {
+                        "weighted": 0.3
+                    }
+                }
             }
         },
         "allowVoteOverwrite": true
