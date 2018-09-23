@@ -41,8 +41,9 @@
                         "weighted": 0.3
                     }
                 }
-            }
-        },
-        "allowVoteOverwrite": true
+            },
+            "allowAbstention": true,
+            "computeResultsAgainst": "ALL_ELIGIBLE_VOTERS"
+        }
     }
 }

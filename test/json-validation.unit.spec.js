@@ -24,6 +24,13 @@ describe('Validate JSONs', function () {
         }
     });
 
+    it('should validate an abstention vote JSON', function () {
+        const vote = require('./data/vote-abstention.json');
+        if (!validateVote(vote)) {
+            throw new Error(JSON.stringify(validateVote.errors, null, 4));
+        }
+    });
+
     it('should validate a participants JSON', function () {
         const participants = require('./data/vote-participants.json');
         if (!validateParticipants(participants)) {

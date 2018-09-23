@@ -17,7 +17,11 @@
                 "yes",
                 "no",
                 "maybe"
-            ]
+            ],
+            "minOptions": 1,
+            "maxOptions": 1,
+            "allowAbstention": false,
+            "computeResultsAgainst": "PARTICIPANTS_ONLY"
         }
     }
 }

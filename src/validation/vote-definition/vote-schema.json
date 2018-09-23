@@ -27,60 +27,6 @@
         }
     },
     "additionalProperties": false,
-    "oneOf": [
-        {
-            "properties": {
-                "type": {
-                    "const": 0
-                },
-                "config": {
-                    "additionalProperties": false,
-                    "required": [
-                        "options"
-                    ],
-                    "properties": {
-                        "options": {
-                            "type": "array",
-                            "minItems": 1,
-                            "items": {
-                                "type": "string"
-                            }
-                        },
-                        "minOptions": {
-                            "type": "integer",
-                            "minimum": 1
-                        },
-                        "maxOptions": {
-                            "type": "integer",
-                            "minimum": {
-                                "$data": "1/minOptions"
-                            },
-                            "maximum": {
-                                "$data": "1/options/length"
-                            }
-                        },
-                        "acceptanceCriteria": {
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "minTurnout": {
-                                    "$ref": "#/definitions/weightedUnweighted"
-                                },
-                                "minSupport": {
-                                    "type": "object",
-                                    "patternProperties": {
-                                        ".*": {
-                                            "$ref": "#/definitions/weightedUnweighted"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    ],
     "properties": {
         "phasesBlockHeights": {
             "type": "object",
@@ -121,13 +67,69 @@
             "pattern": "^[0-9a-f]{64}$"
         },
         "type": {
-            "type": "integer"
+            "enum": [
+                0,
+                1
+            ]
         },
         "config": {
-            "type": "object"
-        },
-        "allowVoteOverwrite": {
-            "type": "boolean"
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "options",
+                "minOptions",
+                "maxOptions",
+                "computeResultsAgainst",
+                "allowAbstention"
+            ],
+            "properties": {
+                "options": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "minOptions": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "maxOptions": {
+                    "type": "integer",
+                    "minimum": {
+                        "$data": "1/minOptions"
+                    },
+                    "maximum": {
+                        "$data": "1/options/length"
+                    }
+                },
+                "acceptanceCriteria": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "minTurnout": {
+                            "$ref": "#/definitions/weightedUnweighted"
+                        },
+                        "minSupport": {
+                            "type": "object",
+                            "patternProperties": {
+                                ".*": {
+                                    "$ref": "#/definitions/weightedUnweighted"
+                                }
+                            }
+                        }
+                    }
+                },
+                "computeResultsAgainst": {
+                    "enum": [
+                        "ALL_ELIGIBLE_VOTERS",
+                        "PARTICIPANTS_ONLY"
+                    ]
+                },
+                "allowAbstention": {
+                    "type": "boolean"
+                }
+            }
         }
     }
 }

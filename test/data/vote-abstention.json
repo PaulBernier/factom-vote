@@ -1,0 +1,6 @@
+{
+    "voteChainId": "8888889822cf1d5889aa8dc11ad210b67d582812152de568fabc5f8505989c0f",
+    "vote": [],
+    "secret": "5941cde5084a390795f7b9234b0c4d6f",
+    "hmacAlgo": "sha512"
+}
