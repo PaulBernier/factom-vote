@@ -4,7 +4,7 @@ const { getPublicAddress } = require('factom'),
 async function commitVote(cli, vote, voter, ecPrivateAddress) {
     // TODO: possible online validation (commitVoteSafe?):
     // config (possible options, min,max...)
-    // voter is a authorized participant
+    // voter is an eliglbe voter
 
     const entry = generateVoteCommitEntry(vote, voter);
     validateFunds(cli, entry.ecCost(), ecPrivateAddress, 'Cannot commit vote');

@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Factom on-chain vote participants schema",
+    "title": "Factom on-chain vote eligible voters schema",
     "type": "array",
     "items": {
         "type": "object",

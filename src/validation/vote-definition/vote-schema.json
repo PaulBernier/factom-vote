@@ -4,7 +4,7 @@
     "type": "object",
     "required": [
         "phasesBlockHeights",
-        "participantsChainId",
+        "eligibleVotersChainId",
         "type",
         "config"
     ],
@@ -62,7 +62,7 @@
                 }
             }
         },
-        "participantsChainId": {
+        "eligibleVotersChainId": {
             "type": "string",
             "pattern": "^[0-9a-f]{64}$"
         },

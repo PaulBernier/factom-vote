@@ -1,4 +1,4 @@
-const { validateVoteDefinition, validateVote, validateParticipants } = require('../src/validation/json-validation');
+const { validateVoteDefinition, validateVote, validateEligibleVoters } = require('../src/validation/json-validation');
 
 
 describe('Validate JSONs', function () {
@@ -31,10 +31,10 @@ describe('Validate JSONs', function () {
         }
     });
 
-    it('should validate a participants JSON', function () {
-        const participants = require('./data/vote-participants.json');
-        if (!validateParticipants(participants)) {
-            throw new Error(JSON.stringify(validateParticipants.errors, null, 4));
+    it('should validate an eligible voters JSON', function () {
+        const eligibleVoters = require('./data/eligible-voters.json');
+        if (!validateEligibleVoters(eligibleVoters)) {
+            throw new Error(JSON.stringify(validateEligibleVoters.errors, null, 4));
         }
     });
 });

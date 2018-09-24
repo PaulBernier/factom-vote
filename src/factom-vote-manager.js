@@ -1,5 +1,5 @@
 const { FactomCli } = require('factom');
-const { createVote, appendParticipants } = require('./create-vote'),
+const { createVote, appendEligibleVoters } = require('./create-vote'),
     { createVoteRegistrationChain } = require('./initialization'),
     { commitVote, revealVote } = require('./participate-vote');
 
@@ -22,9 +22,9 @@ class FactomVoteManager {
         return createVote(this.cli, voteData, ecPrivateAddress);
     }
 
-    async appendParticipants(addParticipantsData, ecAddress) {
+    async appendEligibleVoters(addEligibleVotersData, ecAddress) {
         const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
-        return appendParticipants(this.cli, addParticipantsData, ecPrivateAddress);
+        return appendEligibleVoters(this.cli, addEligibleVotersData, ecPrivateAddress);
     }
 
     async getVote() {

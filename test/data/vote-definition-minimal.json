@@ -10,7 +10,7 @@
             "revealStart": 2001,
             "revealEnd": 3000
         },
-        "participantsChainId": "a480ac008425c12c6cc0aae11c391ff0152c508a05996dfb2e1cdb1c17c73775",
+        "eligibleVotersChainId": "a480ac008425c12c6cc0aae11c391ff0152c508a05996dfb2e1cdb1c17c73775",
         "type": 0,
         "config": {
             "options": [
