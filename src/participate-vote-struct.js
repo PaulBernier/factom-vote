@@ -28,7 +28,7 @@ function generateVoteCommitEntry(vote, voter) {
 }
 
 
-function generateVoteRevealEntry(vote, voter) {
+function generateVoteRevealEntry(vote, voterId) {
     if (!validateVote(vote)) {
         throw new Error('Vote validation error:\n' + JSON.stringify(validateVote.errors));
     }
@@ -39,16 +39,10 @@ function generateVoteRevealEntry(vote, voter) {
         hmacAlgo: vote.hmacAlgo
     }), 'utf8');
 
-    const keyPair = getKeyPair(voter.secretKey);
-    const voteChainId = Buffer.from(vote.voteChainId, 'hex');
-    const signature = sign.detached(Buffer.concat([voteChainId, content]), keyPair.secretKey);
-
     return Entry.builder()
         .chainId(vote.voteChainId)
         .extId('factom-vote-reveal', 'utf8')
-        .extId(voter.id)
-        .extId(keyPair.publicKey)
-        .extId(signature)
+        .extId(voterId)
         .content(content, 'utf8')
         .build();
 }
