@@ -53,8 +53,8 @@ function composeVoteCommitEntry(vote, voter, ecPrivateAddress) {
     return composeHex(composeEntry(generateVoteCommitEntry(vote, voter), ecPrivateAddress));
 }
 
-function composeVoteRevealEntry(vote, voter, ecPrivateAddress) {
-    return composeHex(composeEntry(generateVoteRevealEntry(vote, voter), ecPrivateAddress));
+function composeVoteRevealEntry(vote, voterId, ecPrivateAddress) {
+    return composeHex(composeEntry(generateVoteRevealEntry(vote, voterId), ecPrivateAddress));
 }
 
 function composeHex(compose) {

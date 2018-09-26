@@ -12,11 +12,11 @@ async function commitVote(cli, vote, voter, ecPrivateAddress) {
     return cli.add(entry, ecPrivateAddress);
 }
 
-async function revealVote(cli, vote, voter, ecPrivateAddress) {
+async function revealVote(cli, vote, voterId, ecPrivateAddress) {
     // TODO: possible online validation (revealVoteSafe?):
     // reveal match the commit
 
-    const entry = generateVoteRevealEntry(vote, voter);
+    const entry = generateVoteRevealEntry(vote, voterId);
     validateFunds(cli, entry.ecCost(), ecPrivateAddress, 'Cannot reveal vote');
 
     return cli.add(entry, ecPrivateAddress);

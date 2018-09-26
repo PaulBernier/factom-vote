@@ -36,9 +36,9 @@ class FactomVoteManager {
         return commitVote(this.cli, vote, voter, ecPrivateAddress);
     }
 
-    async revealVote(vote, voter, ecAddress) {
+    async revealVote(vote, voterId, ecAddress) {
         const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
-        return revealVote(this.cli, vote, voter, ecPrivateAddress);
+        return revealVote(this.cli, vote, voterId, ecPrivateAddress);
     }
 
 }
