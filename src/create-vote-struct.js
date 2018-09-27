@@ -7,12 +7,12 @@ const { Chain, composeChain } = require('factom/src/chain'),
 
 const NONCE_SIZE = 32;
 
-function generateVoteChain(vote, administrator) {
+function generateVoteChain(vote, initiator) {
     if (!validateVoteDefinition(vote)) {
         throw new Error('Vote definition validation error:\n' + JSON.stringify(validateVoteDefinition.errors));
     }
 
-    const keyPair = getKeyPair(administrator.secretKey);
+    const keyPair = getKeyPair(initiator.secretKey);
     const content = Buffer.from(JSON.stringify(vote), 'utf8');
 
     const signature = sign.detached(content, keyPair.secretKey);
@@ -20,20 +20,20 @@ function generateVoteChain(vote, administrator) {
     return new Chain(Entry.builder()
         .extId('factom-vote', 'utf8')
         .extId('00') // protocol version
-        .extId(administrator.id)
+        .extId(initiator.id)
         .extId(keyPair.publicKey)
         .extId(signature)
         .content(content)
         .build());
 }
 
-function generateEligibleVotersChain(eligibleVoters, administrator) {
+function generateEligibleVotersChain(eligibleVoters, initiator) {
     // TODO: handle long list of voters (split the JSON)
     if (!validateEligibleVoters(eligibleVoters)) {
         throw new Error('Eligible voters validation error:\n' + JSON.stringify(validateEligibleVoters.errors));
     }
 
-    const keyPair = getKeyPair(administrator.secretKey);
+    const keyPair = getKeyPair(initiator.secretKey);
     const nonce = nacl.randomBytes(NONCE_SIZE);
 
     const content = Buffer.from(JSON.stringify(eligibleVoters), 'utf8');
@@ -41,7 +41,7 @@ function generateEligibleVotersChain(eligibleVoters, administrator) {
 
     return new Chain(Entry.builder()
         .extId('factom-vote-eligible-voters', 'utf8')
-        .extId(administrator.id)
+        .extId(initiator.id)
         .extId(nonce)
         .extId(keyPair.publicKey)
         .extId(signature)
@@ -49,13 +49,13 @@ function generateEligibleVotersChain(eligibleVoters, administrator) {
         .build());
 }
 
-function generateAppendEligibleVotersEntry(eligibleVoters, eligibleVotersChainId, administratorSecretKey) {
+function generateAppendEligibleVotersEntry(eligibleVoters, eligibleVotersChainId, initiatorSecretKey) {
     // TODO: handle long list of voters (split the JSON)
     if (!validateEligibleVoters(eligibleVoters)) {
         throw new Error('Eligible voters validation error:\n' + JSON.stringify(validateEligibleVoters.errors));
     }
     
-    const keyPair = getKeyPair(administratorSecretKey);
+    const keyPair = getKeyPair(initiatorSecretKey);
 
     const nonce = Buffer.from(nacl.randomBytes(NONCE_SIZE));
     const content = Buffer.from(JSON.stringify(eligibleVoters), 'utf8');
@@ -80,20 +80,20 @@ function generateVoteRegistrationEntry(registrationChainId, voteChainId) {
 
 ////////////////////////////
 
-function composeVoteChain(vote, administrator, ecPrivateAddress) {
-    return composeHex(composeChain(generateVoteChain(vote, administrator), ecPrivateAddress));
+function composeVoteChain(vote, initiator, ecPrivateAddress) {
+    return composeHex(composeChain(generateVoteChain(vote, initiator), ecPrivateAddress));
 }
 
 function composeVoteRegistrationEntry(registrationChainId, voteChainId, ecPrivateAddress) {
     return composeHex(composeEntry(generateVoteRegistrationEntry(registrationChainId, voteChainId), ecPrivateAddress));
 }
 
-function composeEligibleVotersChain(eligibleVoters, administrator, ecPrivateAddress) {
-    return composeHex(composeChain(generateEligibleVotersChain(eligibleVoters, administrator), ecPrivateAddress));
+function composeEligibleVotersChain(eligibleVoters, initiator, ecPrivateAddress) {
+    return composeHex(composeChain(generateEligibleVotersChain(eligibleVoters, initiator), ecPrivateAddress));
 }
 
-function composeAppendEligibleVotersEntry(eligibleVoters, eligibleVotersChainId, administratorSecretKey, ecPrivateAddress) {
-    return composeHex(composeEntry(generateAppendEligibleVotersEntry(eligibleVoters, eligibleVotersChainId, administratorSecretKey), ecPrivateAddress));
+function composeAppendEligibleVotersEntry(eligibleVoters, eligibleVotersChainId, initiatorSecretKey, ecPrivateAddress) {
+    return composeHex(composeEntry(generateAppendEligibleVotersEntry(eligibleVoters, eligibleVotersChainId, initiatorSecretKey), ecPrivateAddress));
 }
 
 function composeHex(compose) {
