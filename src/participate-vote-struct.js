@@ -4,7 +4,7 @@ const { Entry, composeEntry } = require('factom/src/entry'),
     { validateVote } = require('./validation/json-validation'),
     { getKeyPair } = require('./crypto');
 
-function generateVoteCommitEntry(vote, voter) {
+function generateVoteCommitEntry(voteChainId, vote, voter) {
     if (!validateVote(vote)) {
         throw new Error('Vote validation error:\n' + JSON.stringify(validateVote.errors));
     }
@@ -14,11 +14,10 @@ function generateVoteCommitEntry(vote, voter) {
     const content = Buffer.from(JSON.stringify({ commitment }));
 
     const keyPair = getKeyPair(voter.secretKey);
-    const voteChainId = Buffer.from(vote.voteChainId, 'hex');
-    const signature = sign.detached(Buffer.concat([voteChainId, content]), keyPair.secretKey);
+    const signature = sign.detached(Buffer.concat([Buffer.from(voteChainId, 'hex'), content]), keyPair.secretKey);
 
     return Entry.builder()
-        .chainId(voteChainId)
+        .chainId(voteChainId, 'hex')
         .extId('factom-vote-commit', 'utf8')
         .extId(voter.id)
         .extId(keyPair.publicKey)
@@ -28,7 +27,7 @@ function generateVoteCommitEntry(vote, voter) {
 }
 
 
-function generateVoteRevealEntry(vote, voterId) {
+function generateVoteRevealEntry(voteChainId, vote, voterId) {
     if (!validateVote(vote)) {
         throw new Error('Vote validation error:\n' + JSON.stringify(validateVote.errors));
     }
@@ -40,7 +39,7 @@ function generateVoteRevealEntry(vote, voterId) {
     }), 'utf8');
 
     return Entry.builder()
-        .chainId(vote.voteChainId)
+        .chainId(voteChainId, 'hex')
         .extId('factom-vote-reveal', 'utf8')
         .extId(voterId)
         .content(content, 'utf8')
@@ -49,12 +48,12 @@ function generateVoteRevealEntry(vote, voterId) {
 
 ///////////////////
 
-function composeVoteCommitEntry(vote, voter, ecPrivateAddress) {
-    return composeHex(composeEntry(generateVoteCommitEntry(vote, voter), ecPrivateAddress));
+function composeVoteCommitEntry(voteChainId, vote, voter, ecPrivateAddress) {
+    return composeHex(composeEntry(generateVoteCommitEntry(voteChainId, vote, voter), ecPrivateAddress));
 }
 
-function composeVoteRevealEntry(vote, voterId, ecPrivateAddress) {
-    return composeHex(composeEntry(generateVoteRevealEntry(vote, voterId), ecPrivateAddress));
+function composeVoteRevealEntry(voteChainId, vote, voterId, ecPrivateAddress) {
+    return composeHex(composeEntry(generateVoteRevealEntry(voteChainId, vote, voterId), ecPrivateAddress));
 }
 
 function composeHex(compose) {

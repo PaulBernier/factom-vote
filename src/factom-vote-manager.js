@@ -31,14 +31,14 @@ class FactomVoteManager {
         // TODO
     }
 
-    async commitVote(vote, voter, ecAddress) {
+    async commitVote(voteChainId, vote, voter, ecAddress) {
         const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
-        return commitVote(this.cli, vote, voter, ecPrivateAddress);
+        return commitVote(this.cli, voteChainId, vote, voter, ecPrivateAddress);
     }
 
-    async revealVote(vote, voterId, ecAddress) {
+    async revealVote(voteChainId, vote, voterId, ecAddress) {
         const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
-        return revealVote(this.cli, vote, voterId, ecPrivateAddress);
+        return revealVote(this.cli, voteChainId, vote, voterId, ecPrivateAddress);
     }
 
 }

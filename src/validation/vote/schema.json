@@ -4,18 +4,17 @@
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "voteChainId",
         "vote",
         "secret",
         "hmacAlgo"
     ],
     "properties": {
-        "voteChainId": {
-            "type": "string",
-            "pattern": "^[0-9a-f]{64}$"
-        },
         "vote": {
-            "type": "array"
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "string"
+            }
         },
         "secret": {
             "type": "string",
@@ -23,7 +22,11 @@
             "minLength": 32
         },
         "hmacAlgo": {
-            "enum": ["sha1", "sha256", "sha512"]
+            "enum": [
+                "sha1",
+                "sha256",
+                "sha512"
+            ]
         }
     }
 }
