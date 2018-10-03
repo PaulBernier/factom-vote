@@ -10,7 +10,7 @@ const cli = new FactomCli({ host: process.env.FACTOM_HOST });
 describe('Participate vote', function () {
 
     it('should commit vote', async function () {
-        this.timeout(5000);
+        this.timeout(10000);
         const voteChainId = 'c973b2db5a4959c64606f7df7903918737f226a0ffaf93911f192582878b29eb';
         const vote = {
             vote: ['yes', 'maybe'],
@@ -24,7 +24,7 @@ describe('Participate vote', function () {
     });
 
     it('should reveal vote', async function () {
-        this.timeout(5000);
+        this.timeout(10000);
         const voteChainId = 'c973b2db5a4959c64606f7df7903918737f226a0ffaf93911f192582878b29eb';
 
         const vote = {
