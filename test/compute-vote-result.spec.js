@@ -45,6 +45,80 @@ describe('Compute vote result', function () {
     });
 
     it('Should compute instand run-off voting result', function () {
+        const definition = {
+            type: 1,
+            config: {
+                options: ['Bob', 'Sue', 'Bill']
+            }
+        };
+        const eligibleVoters = {};
+        const validVotes = {
+            ID_1: ['Bob', 'Bill', 'Sue'],
+            ID_2: ['Sue', 'Bob', 'Bill'],
+            ID_3: ['Bill', 'Sue', 'Bob'],
+            ID_4: ['Bob', 'Bill', 'Sue'],
+            ID_5: ['Sue', 'Bob', 'Bill']
+        };
 
+        const vote = { definition, eligibleVoters, validVotes };
+
+        const result = computeResult(vote);
+
+        assert.equal(result.winner, 'Sue');
+        assert.lengthOf(result.roundsResults, 2);
+        assert.deepEqual(result.roundsResults[0], { 'Bob': 2, 'Sue': 2, 'Bill': 1 });
+        assert.deepEqual(result.roundsResults[1], { 'Bob': 2, 'Sue': 3 });
+    });
+
+    it('Should compute IRV tie', function () {
+        const definition = {
+            type: 1,
+            config: {
+                options: ['Bob', 'Sue', 'Bill']
+            }
+        };
+        const validVotes = {
+            ID_1: ['Bob', 'Bill', 'Sue'],
+            ID_2: ['Sue', 'Bob', 'Bill'],
+            ID_3: ['Bill'],
+            ID_4: ['Bob', 'Bill', 'Sue'],
+            ID_5: ['Sue', 'Bob', 'Bill']
+        };
+
+        const vote = { definition, validVotes };
+
+        const result = computeResult(vote);
+
+        assert.isUndefined(result.winner);
+        assert.lengthOf(result.roundsResults, 2);
+        assert.deepEqual(result.roundsResults[0], { 'Bob': 2, 'Sue': 2, 'Bill': 1 });
+        assert.deepEqual(result.roundsResults[1], { 'Bob': 2, 'Sue': 2 });
+    });
+
+    it('XXXXXXXXXXXXXXXX', function () {
+        const definition = {
+            type: 1,
+            config: {
+                options: ['Bob', 'Sue', 'Bill', 'Paul']
+            }
+        };
+        const validVotes = {
+            ID_1: ['Bob', 'Bill', 'Sue'],
+            ID_2: ['Sue', 'Bill', 'Bob'],
+            ID_3: ['Paul', 'Bill', 'Sue'],
+            ID_4: ['Bob', 'Bill', 'Sue'],
+            ID_5: ['Sue', 'Bob', 'Bill'],
+            ID_6: ['Sue', 'Bill', 'Bob']
+        };
+
+        const vote = { definition, validVotes };
+
+        const result = computeResult(vote);
+
+        assert.equal(result.winner, 'Sue');
+        assert.lengthOf(result.roundsResults, 3);
+        assert.deepEqual(result.roundsResults[0], { 'Bob': 2, 'Sue': 3, 'Bill': 0, 'Paul': 1 });
+        assert.deepEqual(result.roundsResults[1], { 'Bob': 2, 'Sue': 3, 'Paul': 1 });
+        assert.deepEqual(result.roundsResults[2], { 'Bob': 2, 'Sue': 4 });
     });
 });
