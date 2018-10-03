@@ -1,9 +1,9 @@
 const { Chain, composeChain } = require('factom/src/chain'),
-    { validateVoteDefinition, validateEligibleVoters } = require('./validation/json-validation'),
+    { validateVoteDefinition, validateEligibleVoters } = require('../validation/json-validation'),
     { Entry, composeEntry } = require('factom/src/entry'),
     nacl = require('tweetnacl/nacl-fast'),
     sign = nacl.sign,
-    { getKeyPair } = require('./crypto');
+    { getKeyPair } = require('../crypto');
 
 const NONCE_SIZE = 32;
 

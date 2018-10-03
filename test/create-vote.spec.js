@@ -1,7 +1,7 @@
 const { FactomCli } = require('factom'),
     assert = require('chai').assert,
     crypto = require('crypto'),
-    createVote = require('../src/create-vote');
+    createVote = require('../src/write-vote/create-vote');
 
 require('dotenv').config();
 

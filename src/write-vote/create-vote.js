@@ -3,7 +3,7 @@ const { getPublicAddress } = require('factom'),
         generateVoteChain,
         generateVoteRegistrationEntry,
         generateAppendEligibleVotersEntry } = require('./create-vote-struct'),
-    { getKeyPair } = require('./crypto');
+    { getKeyPair } = require('../crypto');
 
 
 async function createVote(cli, voteData, ecPrivateKey) {

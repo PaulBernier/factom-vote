@@ -2,7 +2,7 @@ const assert = require('chai').assert,
     { Entry } = require('factom/src/entry'),
     hash = require('hash.js'),
     sign = require('tweetnacl/nacl-fast').sign,
-    participateVote = require('../src/participate-vote-struct');
+    participateVote = require('../src/write-vote/participate-vote-struct');
 
 const EC_PRIVATE_ADDRESS = 'Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym';
 

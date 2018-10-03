@@ -1,4 +1,4 @@
 module.exports = Object.assign({},
-    require('./create-vote-struct'),
-    require('./participate-vote-struct'),
+    require('./write-vote/create-vote-struct'),
+    require('./write-vote/participate-vote-struct'),
 );

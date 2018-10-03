@@ -1,8 +1,8 @@
 const { Entry, composeEntry } = require('factom/src/entry'),
     hash = require('hash.js'),
     sign = require('tweetnacl/nacl-fast').sign,
-    { validateVote } = require('./validation/json-validation'),
-    { getKeyPair } = require('./crypto');
+    { validateVote } = require('../validation/json-validation'),
+    { getKeyPair } = require('../crypto');
 
 function generateVoteCommitEntry(voteChainId, vote, voter) {
     if (!validateVote(vote)) {
