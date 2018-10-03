@@ -1,4 +1,5 @@
 const assert = require('chai').assert,
+    crypto = require('crypto'),
     { Entry } = require('factom/src/entry'),
     hash = require('hash.js'),
     sign = require('tweetnacl/nacl-fast').sign,
@@ -29,7 +30,7 @@ describe('Participate in vote structures', function () {
         assert.deepEqual(entry.extIds[2], publicKey);
         const hmac = hash.hmac(hash.sha512, Buffer.from(vote.secret, 'hex')).update(Buffer.from('YesMaybe')).digest('hex');
 
-        const dataSigned = Buffer.concat([Buffer.from('c71a06c108fccb7bf4d4737dfa5c51371c5845c9598a06e1203f465c247d51a6', 'hex'), entry.content]);
+        const dataSigned = crypto.createHash('sha512').update(Buffer.concat([Buffer.from('c71a06c108fccb7bf4d4737dfa5c51371c5845c9598a06e1203f465c247d51a6', 'hex'), entry.content])).digest();
         assert.isTrue(sign.detached.verify(dataSigned, entry.extIds[3], publicKey));
         assert.equal(JSON.parse(entry.content.toString()).commitment, hmac);
     });

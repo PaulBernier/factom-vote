@@ -2,7 +2,7 @@ const { Entry, composeEntry } = require('factom/src/entry'),
     hash = require('hash.js'),
     sign = require('tweetnacl/nacl-fast').sign,
     { validateVote } = require('../validation/json-validation'),
-    { getKeyPair } = require('../crypto');
+    { getKeyPair, sha512 } = require('../crypto');
 
 function generateVoteCommitEntry(voteChainId, vote, voter) {
     if (!validateVote(vote)) {
@@ -14,7 +14,8 @@ function generateVoteCommitEntry(voteChainId, vote, voter) {
     const content = Buffer.from(JSON.stringify({ commitment }));
 
     const keyPair = getKeyPair(voter.secretKey);
-    const signature = sign.detached(Buffer.concat([Buffer.from(voteChainId, 'hex'), content]), keyPair.secretKey);
+    const dataToSign = sha512(Buffer.concat([Buffer.from(voteChainId, 'hex'), content]));
+    const signature = sign.detached(dataToSign, keyPair.secretKey);
 
     return Entry.builder()
         .chainId(voteChainId, 'hex')

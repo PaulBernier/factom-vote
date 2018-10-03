@@ -1,4 +1,5 @@
 const assert = require('chai').assert,
+    crypto = require('crypto'),
     { Chain } = require('factom/src/chain'),
     { Entry } = require('factom/src/entry'),
     sign = require('tweetnacl/nacl-fast').sign,
@@ -21,7 +22,8 @@ describe('Create vote structures', function () {
         assert.equal(entry.extIds[2].toString('hex'), initiator.id);
         const publicKey = sign.keyPair.fromSeed(Buffer.from(initiator.secretKey, 'hex')).publicKey;
         assert.deepEqual(entry.extIds[3], publicKey);
-        assert.isTrue(sign.detached.verify(entry.content, entry.extIds[4], entry.extIds[3]));
+        const dataSigned = crypto.createHash('sha512').update(entry.content).digest();
+        assert.isTrue(sign.detached.verify(dataSigned, entry.extIds[4], entry.extIds[3]));
         assert.deepEqual(JSON.parse(entry.content.toString()), vote);
     });
 
@@ -50,7 +52,8 @@ describe('Create vote structures', function () {
         assert.lengthOf(entry.extIds[2], 32);
         const publicKey = sign.keyPair.fromSeed(Buffer.from(initiator.secretKey, 'hex')).publicKey;
         assert.deepEqual(entry.extIds[3], publicKey);
-        assert.isTrue(sign.detached.verify(Buffer.concat([entry.extIds[2], entry.content]), entry.extIds[4], entry.extIds[3]));
+        const dataSigned = crypto.createHash('sha512').update(Buffer.concat([entry.extIds[2], entry.content])).digest();
+        assert.isTrue(sign.detached.verify(dataSigned, entry.extIds[4], entry.extIds[3]));
         assert.deepEqual(JSON.parse(entry.content.toString()), eligibleVoters);
     });
 
@@ -67,7 +70,7 @@ describe('Create vote structures', function () {
         assert.lengthOf(entry.extIds[0], 32);
 
         const publicKey = sign.keyPair.fromSeed(Buffer.from(initiatorSecretKey, 'hex')).publicKey;
-        const dataSigned = Buffer.concat([Buffer.from(eligibleVotersChainId, 'hex'), entry.extIds[0], entry.content]);
+        const dataSigned = crypto.createHash('sha512').update(Buffer.concat([Buffer.from(eligibleVotersChainId, 'hex'), entry.extIds[0], entry.content])).digest();
         assert.isTrue(sign.detached.verify(dataSigned, entry.extIds[1], publicKey));
         assert.deepEqual(JSON.parse(entry.content.toString()), eligibleVoters);
     });

@@ -103,7 +103,7 @@ function isVoteValid(acceptanceCriteria, turnout) {
     return true;
 }
 
-function computeIRVResult(voteConfig, eligibleVoters, votes) {
+function computeIRVResult() {
     // TODO
 }
 

@@ -3,7 +3,7 @@ const { Chain, composeChain } = require('factom/src/chain'),
     { Entry, composeEntry } = require('factom/src/entry'),
     nacl = require('tweetnacl/nacl-fast'),
     sign = nacl.sign,
-    { getKeyPair } = require('../crypto');
+    { getKeyPair, sha512 } = require('../crypto');
 
 const NONCE_SIZE = 32;
 
@@ -14,8 +14,8 @@ function generateVoteChain(vote, initiator) {
 
     const keyPair = getKeyPair(initiator.secretKey);
     const content = Buffer.from(JSON.stringify(vote), 'utf8');
-
-    const signature = sign.detached(content, keyPair.secretKey);
+    const dataToSign = sha512(content);
+    const signature = sign.detached(dataToSign, keyPair.secretKey);
 
     return new Chain(Entry.builder()
         .extId('factom-vote', 'utf8')
@@ -37,7 +37,8 @@ function generateEligibleVotersChain(eligibleVoters, initiator) {
     const nonce = nacl.randomBytes(NONCE_SIZE);
 
     const content = Buffer.from(JSON.stringify(eligibleVoters), 'utf8');
-    const signature = sign.detached(Buffer.concat([nonce, content]), keyPair.secretKey);
+    const dataToSign = sha512(Buffer.concat([nonce, content]));
+    const signature = sign.detached(dataToSign, keyPair.secretKey);
 
     return new Chain(Entry.builder()
         .extId('factom-vote-eligible-voters', 'utf8')
@@ -54,12 +55,13 @@ function generateAppendEligibleVotersEntry(eligibleVoters, eligibleVotersChainId
     if (!validateEligibleVoters(eligibleVoters)) {
         throw new Error('Eligible voters validation error:\n' + JSON.stringify(validateEligibleVoters.errors));
     }
-    
+
     const keyPair = getKeyPair(initiatorSecretKey);
 
     const nonce = Buffer.from(nacl.randomBytes(NONCE_SIZE));
     const content = Buffer.from(JSON.stringify(eligibleVoters), 'utf8');
-    const signature = sign.detached(Buffer.concat([Buffer.from(eligibleVotersChainId, 'hex'), nonce, content]), keyPair.secretKey);
+    const dataToSign = sha512(Buffer.concat([Buffer.from(eligibleVotersChainId, 'hex'), nonce, content]));
+    const signature = sign.detached(dataToSign, keyPair.secretKey);
 
     return Entry.builder()
         .chainId(eligibleVotersChainId)

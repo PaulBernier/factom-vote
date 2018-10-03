@@ -1,4 +1,5 @@
 const nacl = require('tweetnacl/nacl-fast'),
+    hash = require('hash.js'),
     sign = nacl.sign;
 
 function getKeyPair(secretKey) {
@@ -14,4 +15,8 @@ function getKeyPair(secretKey) {
     }
 }
 
-module.exports = { getKeyPair };
+function sha512(data) {
+    return Buffer.from(hash.sha512().update(data).digest());
+}
+
+module.exports = { getKeyPair, sha512 };
