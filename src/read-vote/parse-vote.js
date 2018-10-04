@@ -1,5 +1,5 @@
 const sign = require('tweetnacl/nacl-fast').sign,
-    sha512 = require('../crypto'),
+    { sha512 } = require('../crypto'),
     { validateVoteDefinition, validateEligibleVoters, validateVote } = require('../validation/json-validation');
 
 /**
@@ -45,7 +45,7 @@ async function parseVoteChain(cli, chainId) {
                     break;
             }
         } catch (e) {
-            parseErrors.push({ entryHash: entry.hashHex(), error: e });
+            parseErrors.push({ entryHash: entry.hashHex(), error: e.message });
         }
     });
 
@@ -66,10 +66,10 @@ async function parseEligibleVotersChain(cli, chainId) {
 
     const initialEligibleVoters = parseInitialEligibleVotersEntry(entries[0]);
 
-    const parseErrors = [];
-    const appends = entries.slice(1).map(function (entry) {
+    const appends = [], parseErrors = [];
+    entries.slice(1).forEach(function (entry) {
         try {
-            return parseAppendEligibleVotersEntry(entry, initialEligibleVoters.identity, initialEligibleVoters.publicKey);
+            appends.push(parseAppendEligibleVotersEntry(entry, initialEligibleVoters.identity, initialEligibleVoters.publicKey));
         } catch (e) {
             parseErrors.push({ entryHash: entry.hashHex(), error: e });
         }
@@ -228,4 +228,4 @@ function parseVoteRevealEntry(entry) {
     };
 }
 
-module.exports = { parseVote };
+module.exports = { parseVote, parseVoteChain, parseVoteChainEntry, parseEligibleVotersChain };

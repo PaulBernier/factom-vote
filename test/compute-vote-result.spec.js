@@ -95,7 +95,7 @@ describe('Compute vote result', function () {
         assert.deepEqual(result.roundsResults[1], { 'Bob': 2, 'Sue': 2 });
     });
 
-    it('XXXXXXXXXXXXXXXX', function () {
+    it('Should compute IRV edge case no vote for Bill at 1st round', function () {
         const definition = {
             type: 1,
             config: {

@@ -10,8 +10,9 @@ async function createVote(cli, voteData, ecPrivateKey) {
     const { definition, registrationChainId, eligibleVoters, initiator } = voteData;
 
     const eligibleVotersChain = generateEligibleVotersChain(eligibleVoters || [], initiator);
-    definition.vote.eligibleVotersChainId = eligibleVotersChain.idHex;
-    const voteChain = generateVoteChain(definition, initiator);
+    const defCopy = JSON.parse(JSON.stringify(definition));
+    defCopy.vote.eligibleVotersChainId = eligibleVotersChain.idHex;
+    const voteChain = generateVoteChain(defCopy, initiator);
     const registrationEntry = generateVoteRegistrationEntry(registrationChainId, voteChain.id);
 
     const ecCost = eligibleVotersChain.ecCost() + voteChain.ecCost() + registrationEntry.ecCost();
