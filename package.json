@@ -1,6 +1,6 @@
 {
     "name": "factom-vote",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "description": "JS implementation of the Factom voting specification",
     "main": "src/factom-vote.js",
     "scripts": {
@@ -28,6 +28,7 @@
     },
     "homepage": "https://github.com/PaulBernier/factom-vote#readme",
     "dependencies": {
+        "ajv": "^6.5.4",
         "factom": "0.3.6",
         "hash.js": "^1.1.5",
         "tweetnacl": "^1.0.0"
