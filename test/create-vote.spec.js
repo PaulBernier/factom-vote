@@ -10,7 +10,7 @@ const cli = new FactomCli({ host: process.env.FACTOM_HOST });
 describe('Create vote', function () {
 
     it('should create a vote', async function () {
-        this.timeout(10000);
+        this.timeout(20000);
         const definition = require('./data/vote-definition');
         const registrationChainId = 'a968e880ee3a7002f25ade15ae36a77c15f4dbc9d8c11fdd5fe86ba6af73a475';
         const eligibleVoters = require('./data/eligible-voters');

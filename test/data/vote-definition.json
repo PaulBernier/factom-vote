@@ -26,7 +26,7 @@
                 "maybe"
             ],
             "minOptions": 1,
-            "maxOptions": 1,
+            "maxOptions": 2,
             "acceptanceCriteria": {
                 "minTurnout": {
                     "weighted": 0.3,
