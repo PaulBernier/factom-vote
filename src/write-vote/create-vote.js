@@ -9,17 +9,23 @@ async function createVote(cli, voteData, ecAddress) {
     const { definition, registrationChainId, eligibleVoters, identity } = voteData;
 
     const initiator = await getVoteIdentity(cli, identity);
-
-    const eligibleVotersChain = generateEligibleVotersChain(eligibleVoters || [], initiator);
     const defCopy = JSON.parse(JSON.stringify(definition));
-    defCopy.vote.eligibleVotersChainId = eligibleVotersChain.idHex;
-    const voteChain = generateVoteChain(defCopy, initiator);
-    const registrationEntry = generateVoteRegistrationEntry(registrationChainId, voteChain.id);
+    const chainsToCreate = [];
 
-    const ecCost = eligibleVotersChain.ecCost() + voteChain.ecCost() + registrationEntry.ecCost();
+    if (!defCopy.vote.eligibleVotersChainId) {
+        const eligibleVotersChain = generateEligibleVotersChain(eligibleVoters || [], initiator);
+        defCopy.vote.eligibleVotersChainId = eligibleVotersChain.idHex;
+        chainsToCreate.push(eligibleVotersChain);
+    }
+
+    const voteChain = generateVoteChain(defCopy, initiator);
+    chainsToCreate.push(voteChain);
+    const registrationEntry = generateVoteRegistrationEntry(registrationChainId, voteChain.id);
+    const ecCost = registrationEntry.ecCost() + chainsToCreate.map(c => c.ecCost()).reduce((acc, cur) => acc + cur, 0);
+
     await validateFunds(cli, ecCost, ecAddress, 'Cannot create vote');
 
-    const [eligibleVotersChainAdded, voteChainAdded] = await cli.add([eligibleVotersChain, voteChain], ecAddress);
+    const [voteChainAdded, eligibleVotersChainAdded] = await cli.add(chainsToCreate.reverse(), ecAddress);
     const registration = await cli.add(registrationEntry, ecAddress);
 
     return {
