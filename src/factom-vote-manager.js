@@ -14,18 +14,15 @@ class FactomVoteManager {
     }
 
     async createVoteRegistrationChain(ecAddress, nonce) {
-        const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
-        return createVoteRegistrationChain(this.cli, nonce, ecPrivateAddress);
+        return createVoteRegistrationChain(this.cli, nonce, ecAddress);
     }
 
     async createVote(voteData, ecAddress) {
-        const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
-        return createVote(this.cli, voteData, ecPrivateAddress);
+        return createVote(this.cli, voteData, ecAddress);
     }
 
-    async appendEligibleVoters(addEligibleVotersData, ecAddress) {
-        const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
-        return appendEligibleVoters(this.cli, addEligibleVotersData, ecPrivateAddress);
+    async appendEligibleVoters(appendEligibleVotersData, ecAddress) {
+        return appendEligibleVoters(this.cli, appendEligibleVotersData, ecAddress);
     }
 
     async getVote(chainId) {
@@ -33,13 +30,11 @@ class FactomVoteManager {
     }
 
     async commitVote(voteChainId, vote, voter, ecAddress) {
-        const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
-        return commitVote(this.cli, voteChainId, vote, voter, ecPrivateAddress);
+        return commitVote(this.cli, voteChainId, vote, voter, ecAddress);
     }
 
     async revealVote(voteChainId, vote, voterId, ecAddress) {
-        const ecPrivateAddress = await this.cli.getPrivateAddress(ecAddress);
-        return revealVote(this.cli, voteChainId, vote, voterId, ecPrivateAddress);
+        return revealVote(this.cli, voteChainId, vote, voterId, ecAddress);
     }
 
 }

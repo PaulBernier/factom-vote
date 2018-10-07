@@ -3,11 +3,12 @@ const { getPublicAddress } = require('factom'),
         generateVoteChain,
         generateVoteRegistrationEntry,
         generateAppendEligibleVotersEntry } = require('./create-vote-struct'),
-    { getKeyPair } = require('../crypto');
+    { getVoteIdentity, extractKey, getPublicIdentityKey, getSecretIdentityKey } = require('../factom-identity');
 
+async function createVote(cli, voteData, ecAddress) {
+    const { definition, registrationChainId, eligibleVoters, identity } = voteData;
 
-async function createVote(cli, voteData, ecPrivateKey) {
-    const { definition, registrationChainId, eligibleVoters, initiator } = voteData;
+    const initiator = await getVoteIdentity(cli, identity);
 
     const eligibleVotersChain = generateEligibleVotersChain(eligibleVoters || [], initiator);
     const defCopy = JSON.parse(JSON.stringify(definition));
@@ -16,10 +17,10 @@ async function createVote(cli, voteData, ecPrivateKey) {
     const registrationEntry = generateVoteRegistrationEntry(registrationChainId, voteChain.id);
 
     const ecCost = eligibleVotersChain.ecCost() + voteChain.ecCost() + registrationEntry.ecCost();
-    await validateFunds(cli, ecCost, ecPrivateKey, 'Cannot create vote');
+    await validateFunds(cli, ecCost, ecAddress, 'Cannot create vote');
 
-    const [eligibleVotersChainAdded, voteChainAdded] = await cli.add([eligibleVotersChain, voteChain], ecPrivateKey);
-    const registration = await cli.add(registrationEntry, ecPrivateKey);
+    const [eligibleVotersChainAdded, voteChainAdded] = await cli.add([eligibleVotersChain, voteChain], ecAddress);
+    const registration = await cli.add(registrationEntry, ecAddress);
 
     return {
         eligibleVoters: eligibleVotersChainAdded,
@@ -28,18 +29,19 @@ async function createVote(cli, voteData, ecPrivateKey) {
     };
 }
 
-async function appendEligibleVoters(cli, appendEligibleVotersData, ecPrivateKey) {
-    const { eligibleVoters, eligibleVotersChainId, initiatorSecretKey } = appendEligibleVotersData;
+async function appendEligibleVoters(cli, appendEligibleVotersData, ecAddress) {
+    const { eligibleVoters, eligibleVotersChainId, identityKey } = appendEligibleVotersData;
 
-    const canAppend = await canAppendEligibleVoters(cli, eligibleVotersChainId, initiatorSecretKey);
+    const canAppend = await canAppendEligibleVoters(cli, eligibleVotersChainId, identityKey);
     if (!canAppend) {
         throw new Error(`The initiator secret key is not authorized to add eligible voters to [${eligibleVotersChainId}].`);
     }
 
-    const entry = generateAppendEligibleVotersEntry(eligibleVoters, eligibleVotersChainId, initiatorSecretKey);
-    await validateFunds(cli, entry.ecCost(), ecPrivateKey, 'Cannot append eligible voters');
+    const secretKey = extractKey(await getSecretIdentityKey(cli, identityKey));
+    const entry = generateAppendEligibleVotersEntry(eligibleVoters, eligibleVotersChainId, secretKey);
+    await validateFunds(cli, entry.ecCost(), ecAddress, 'Cannot append eligible voters');
 
-    return cli.add(entry, ecPrivateKey);
+    return cli.add(entry, ecAddress);
 }
 
 async function validateFunds(cli, ecCost, ecAddress, message) {
@@ -51,9 +53,9 @@ async function validateFunds(cli, ecCost, ecAddress, message) {
 
 }
 
-async function canAppendEligibleVoters(cli, eligibleVotersChainId, initiatorSecretKey) {
+async function canAppendEligibleVoters(cli, eligibleVotersChainId, identityKey) {
     const firstEntry = await cli.getFirstEntry(eligibleVotersChainId);
-    const publicKey = Buffer.from(getKeyPair(initiatorSecretKey).publicKey);
+    const publicKey = extractKey(getPublicIdentityKey(identityKey));
     return publicKey.equals(firstEntry.extIds[3]);
 }
 

@@ -1,25 +1,27 @@
 const { getPublicAddress } = require('factom'),
+    { getVoteIdentity } = require('../factom-identity'),
     { generateVoteCommitEntry, generateVoteRevealEntry } = require('./participate-vote-struct');
 
-async function commitVote(cli, voteChainId, vote, voter, ecPrivateAddress) {
+async function commitVote(cli, voteChainId, vote, identity, ecAddress) {
     // TODO: possible online validation (commitVoteSafe?):
     // config (possible options, min,max...)
     // voter is an eliglbe voter
 
+    const voter = await getVoteIdentity(cli, identity);
     const entry = generateVoteCommitEntry(voteChainId, vote, voter);
-    validateFunds(cli, entry.ecCost(), ecPrivateAddress, 'Cannot commit vote');
+    validateFunds(cli, entry.ecCost(), ecAddress, 'Cannot commit vote');
 
-    return cli.add(entry, ecPrivateAddress);
+    return cli.add(entry, ecAddress);
 }
 
-async function revealVote(cli, voteChainId, vote, voterId, ecPrivateAddress) {
+async function revealVote(cli, voteChainId, vote, voterId, ecAddress) {
     // TODO: possible online validation (revealVoteSafe?):
     // reveal match the commit
 
     const entry = generateVoteRevealEntry(voteChainId, vote, voterId);
-    validateFunds(cli, entry.ecCost(), ecPrivateAddress, 'Cannot reveal vote');
+    validateFunds(cli, entry.ecCost(), ecAddress, 'Cannot reveal vote');
 
-    return cli.add(entry, ecPrivateAddress);
+    return cli.add(entry, ecAddress);
 }
 
 async function validateFunds(cli, ecCost, ecAddress, message) {

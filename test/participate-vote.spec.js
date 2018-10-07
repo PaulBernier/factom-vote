@@ -17,7 +17,7 @@ describe('Participate vote', function () {
             secret: crypto.randomBytes(16).toString('hex'),
             hmacAlgo: 'sha512'
         };
-        const voter = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
+        const voter = { chainId: crypto.randomBytes(32), key: 'idsec1wnZ9FLheMDXZNnnDHXdqZcMiDrgg2hTNzdseNLwFnEot362c4' };
 
         const result = await participateVote.commitVote(cli, voteChainId, vote, voter, process.env.EC_PRIVATE_KEY);
         assert.isObject(result);

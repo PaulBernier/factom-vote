@@ -15,8 +15,12 @@ function getKeyPair(secretKey) {
     }
 }
 
+function sha256d(data) {
+    return Buffer.from(hash.sha256().update(hash.sha256().update(data).digest()).digest());
+}
+
 function sha512(data) {
     return Buffer.from(hash.sha512().update(data).digest());
 }
 
-module.exports = { getKeyPair, sha512 };
+module.exports = { getKeyPair, sha512, sha256d };

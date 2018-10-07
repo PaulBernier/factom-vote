@@ -1,8 +1,8 @@
 const { generateVoteRegistrationChain } = require('./initialization-struct');
 
-function createVoteRegistrationChain(cli, nonce, ecPrivateAddress) {
+async function createVoteRegistrationChain(cli, nonce, ecAddress) {
     const chain = generateVoteRegistrationChain(nonce);
-    return cli.add(chain, ecPrivateAddress);
+    return cli.add(chain, ecAddress);
 }
 
 module.exports = {

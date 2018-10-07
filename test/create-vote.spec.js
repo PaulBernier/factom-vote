@@ -1,6 +1,5 @@
 const { FactomCli } = require('factom'),
     assert = require('chai').assert,
-    crypto = require('crypto'),
     createVote = require('../src/write-vote/create-vote');
 
 require('dotenv').config();
@@ -14,9 +13,9 @@ describe('Create vote', function () {
         const definition = require('./data/vote-definition');
         const registrationChainId = 'a968e880ee3a7002f25ade15ae36a77c15f4dbc9d8c11fdd5fe86ba6af73a475';
         const eligibleVoters = require('./data/eligible-voters');
-        const initiator = { id: '34704bd0fe5d8a6a7816fd5db9072580610a1b89406b3bc48b68b79c5fefb9b2', secretKey: crypto.randomBytes(32) };
+        const identity = { chainId: '34704bd0fe5d8a6a7816fd5db9072580610a1b89406b3bc48b68b79c5fefb9b2', key: 'idsec2Vn3VT8FdE1YpcDms8zSvXR4DGzQeMMdeLRP2RbMCSWCFoQDbS' };
         const voteData = {
-            definition, registrationChainId, eligibleVoters, initiator
+            definition, registrationChainId, eligibleVoters, identity
         };
 
         const result = await createVote.createVote(cli, voteData, process.env.EC_PRIVATE_KEY);
@@ -28,12 +27,12 @@ describe('Create vote', function () {
 
     xit('should append eligible voters', async function () {
         this.timeout(10000);
-        const initiatorSecretKey = '5ac48e36b6f5884a8a8ef64d11734ff5c07e428593015d387f3284453cda3739';
+        const identityKey = 'idsec2Vn3VT8FdE1YpcDms8zSvXR4DGzQeMMdeLRP2RbMCSWCFoQDbS';
         const eligibleVotersChainId = '2e51ae1d84831b04f75c51e1d352d6e186ac8aeea47bfb412749774a5dd53907';
         const eligibleVoters = require('./data/eligible-voters');
 
         const appendEligibleVotersData = {
-            eligibleVoters, eligibleVotersChainId, initiatorSecretKey
+            eligibleVoters, eligibleVotersChainId, identityKey
         };
 
         const result = await createVote.appendEligibleVoters(cli, appendEligibleVotersData, process.env.EC_PRIVATE_KEY);

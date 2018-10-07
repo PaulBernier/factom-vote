@@ -97,9 +97,6 @@ function isVoteValid(acceptanceCriteria, turnout) {
         }
     }
 
-    // Verify min support
-    // TODO
-
     return true;
 }
 
