@@ -6,20 +6,7 @@ const ID_PUB_PREFIX = Buffer.from('0345ef9de0', 'hex'),
 const VALID_ID_PREFIXES = new Set(['idpub', 'idsec']);
 
 async function getVoteIdentity(cli, identity) {
-    // TODO: enable verification. Refactor this verification to be re usable in parse-vote
-
-    // const heights = await cli.getHeights();
-
-    // const { keys } = await cli.walletdApi('identity-keys-at-height', {
-    //     chainid: identity.chainId,
-    //     height: heights.leaderHeight - 1
-    // });
-
-    // const publicIdentityKey = getPublicIdentityKey(identity.key);
-
-    // if (!keys.includes(publicIdentityKey)) {
-    //     throw new Error(`Public identity key ${publicIdentityKey} is not associated with identity ${identity.chainId} at block ${heights.leaderHeight - 1}.`);
-    // }
+    await verifyIdentityKeyAssociation(cli, identity.chainId, identity.key);
 
     const secretKey = extractKey(await getSecretIdentityKey(cli, identity.key));
 
@@ -27,6 +14,24 @@ async function getVoteIdentity(cli, identity) {
         id: identity.chainId,
         secretKey: secretKey
     };
+}
+
+async function verifyIdentityKeyAssociation(cli, identityChainId, identityKey, blockHeight) {
+    const publicIdentityKey = getPublicIdentityKey(identityKey);
+
+    if (typeof blockHeight !== 'number') {
+        const heights = await cli.getHeights();
+        blockHeight = heights.leaderHeight - 1;
+    }
+
+    const { keys } = await cli.walletdApi('identity-keys-at-height', {
+        chainid: identityChainId,
+        height: blockHeight
+    });
+
+    if (!keys.includes(publicIdentityKey)) {
+        throw new Error(`Public identity key [${publicIdentityKey}] is not associated with identity [${identityChainId}] at block height ${blockHeight}.`);
+    }
 }
 
 function extractKey(identityKey) {
@@ -115,5 +120,6 @@ module.exports = {
     isValidPublicIdentityKey,
     isValidSecretIdentityKey,
     keyToPublicIdentityKey,
-    keyToSecretIdentityKey
+    keyToSecretIdentityKey,
+    verifyIdentityKeyAssociation
 };

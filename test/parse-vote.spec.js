@@ -2,6 +2,7 @@ const assert = require('chai').assert,
     sinon = require('sinon'),
     crypto = require('crypto'),
     { FactomCli, Entry } = require('factom'),
+    { keyToSecretIdentityKey, getPublicIdentityKey } = require('../src/factom-identity'),
     { parseVote, parseVoteChain, parseVoteChainEntry, parseEligibleVotersChain } = require('../src/read-vote/parse-vote'),
     { generateVoteChain, generateEligibleVotersChain, generateAppendEligibleVotersEntry } = require('../src/write-vote/create-vote-struct'),
     { generateVoteCommitEntry, generateVoteRevealEntry } = require('../src/write-vote/participate-vote-struct');
@@ -11,6 +12,7 @@ describe('Parse vote', function () {
     it('Should parse eligible voters chain', async function () {
 
         const initiator = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
+        const initiatorPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(initiator.secretKey));
         const initialVoters = [{ voterId: 'ID_1', weight: 22 }, { voterId: 'ID_2' }];
         const appendVoters = [{ voterId: 'ID_1', weight: 0 }, { voterId: 'ID_3' }];
 
@@ -32,6 +34,9 @@ describe('Parse vote', function () {
             .once()
             .withArgs('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679')
             .returns(Promise.resolve([firstEntry, invalidEntry, appendEntry]));
+        mock.expects('getHeights').never();
+        expectIdentityKeysAtHeightCall(mock, initiator, 1, initiatorPublicIdentityKey);
+        expectIdentityKeysAtHeightCall(mock, initiator, 2, initiatorPublicIdentityKey);
 
         const { eligibleVotersRegitrations, parseErrors } = await parseEligibleVotersChain(cli, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
         mock.verify();
@@ -50,12 +55,21 @@ describe('Parse vote', function () {
 
     it('Should parse vote definition entry', async function () {
         const initiator = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
+        const initiatorPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(initiator.secretKey));
         const vote = require('./data/vote-definition');
         const entry = Entry.builder(generateVoteChain(vote, initiator).firstEntry)
             .blockContext({ directoryBlockHeight: 11 })
             .build();
-        const parsed = parseVoteChainEntry(entry);
 
+        const cli = new FactomCli();
+        const mock = sinon.mock(cli);
+        mock.expects('getHeights').never();
+        expectIdentityKeysAtHeightCall(mock, initiator, 11, initiatorPublicIdentityKey);
+
+
+        const parsed = await parseVoteChainEntry(cli, entry);
+
+        mock.verify();
         assert.equal(parsed.type, 'definition');
         assert.equal(parsed.identity, initiator.id.toString('hex'));
         assert.deepEqual(parsed.data, vote);
@@ -66,11 +80,18 @@ describe('Parse vote', function () {
     it('Should parse vote commit entry', async function () {
 
         const voter = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
+        const voterPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(voter.secretKey));
         const vote = require('./data/vote.json');
         const entry = Entry.builder(generateVoteCommitEntry('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', vote, voter))
             .blockContext({ directoryBlockHeight: 2 })
             .build();
-        const parsed = parseVoteChainEntry(entry);
+
+        const cli = new FactomCli();
+        const mock = sinon.mock(cli);
+        mock.expects('getHeights').never();
+        expectIdentityKeysAtHeightCall(mock, voter, 2, voterPublicIdentityKey);
+
+        const parsed = await parseVoteChainEntry(cli, entry);
 
         assert.equal(parsed.type, 'commit');
         assert.equal(parsed.identity, voter.id.toString('hex'));
@@ -86,7 +107,7 @@ describe('Parse vote', function () {
             .blockContext({ directoryBlockHeight: 7 })
             .build();
 
-        const parsed = parseVoteChainEntry(entry);
+        const parsed = parseVoteChainEntry(null, entry);
 
         assert.equal(parsed.type, 'reveal');
         assert.equal(parsed.identity, voterId.toString('hex'));
@@ -96,12 +117,16 @@ describe('Parse vote', function () {
 
     it('Should parse vote chain', async function () {
         const initiator = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
+        const initiatorPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(initiator.secretKey));
+
         const voteDef = require('./data/vote-definition');
         const voteChainFirstEntry = Entry.builder(generateVoteChain(voteDef, initiator).firstEntry)
             .blockContext({ directoryBlockHeight: 1 })
             .build();
 
         const voter = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
+        const voterPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(voter.secretKey));
+
         const vote = require('./data/vote.json');
         const commitEntry = Entry.builder(generateVoteCommitEntry('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', vote, voter))
             .blockContext({ directoryBlockHeight: 2 })
@@ -120,12 +145,15 @@ describe('Parse vote', function () {
             .once()
             .withArgs('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679')
             .onFirstCall()
-            .callsFake(function (chainId, condition, f) {
-                f(revealEntry);
-                f(invalidEntry);
-                f(commitEntry);
-                f(voteChainFirstEntry);
+            .callsFake(async function (chainId, condition, f) {
+                await f(revealEntry);
+                await f(invalidEntry);
+                await f(commitEntry);
+                await f(voteChainFirstEntry);
             });
+        mock.expects('getHeights').never();
+        expectIdentityKeysAtHeightCall(mock, voter, 2, voterPublicIdentityKey);
+        expectIdentityKeysAtHeightCall(mock, initiator, 1, initiatorPublicIdentityKey);
 
         const { definition,
             commits,
@@ -161,6 +189,8 @@ describe('Parse vote', function () {
     it('Should parse vote', async function () {
 
         const initiator = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
+        const initiatorPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(initiator.secretKey));
+
         const initialVoters = [{ voterId: 'ID_1', weight: 22 }, { voterId: 'ID_2' }];
         const initialVotersEntry = Entry.builder(generateEligibleVotersChain(initialVoters, initiator).firstEntry)
             .blockContext({ directoryBlockHeight: 1 })
@@ -173,6 +203,8 @@ describe('Parse vote', function () {
             .build();
 
         const voter = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
+        const voterPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(voter.secretKey));
+
         const vote = require('./data/vote.json');
         const commitEntry = Entry.builder(generateVoteCommitEntry('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', vote, voter))
             .blockContext({ directoryBlockHeight: 2 })
@@ -187,16 +219,20 @@ describe('Parse vote', function () {
             .once()
             .withArgs('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679')
             .onFirstCall()
-            .callsFake(function (chainId, condition, f) {
-                f(revealEntry);
-                f(commitEntry);
-                f(voteChainFirstEntry);
+            .callsFake(async function (chainId, condition, f) {
+                await f(revealEntry);
+                await f(commitEntry);
+                await f(voteChainFirstEntry);
             });
         mock.expects('getAllEntriesOfChain')
             .once()
             .returns(Promise.resolve([initialVotersEntry]));
+        mock.expects('getHeights').never();
+        expectIdentityKeysAtHeightCall(mock, voter, 2, voterPublicIdentityKey);
+        expectIdentityKeysAtHeightCall(mock, initiator, 1, initiatorPublicIdentityKey, 2);
 
         const { definition, commits, reveals, eligibleVotersRegitrations } = await parseVote(cli, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
+
         mock.verify();
         assert.deepEqual(definition.data, voteDef);
         assert.lengthOf(commits, 1);
@@ -204,4 +240,14 @@ describe('Parse vote', function () {
         assert.lengthOf(eligibleVotersRegitrations, 1);
 
     });
+
+    function expectIdentityKeysAtHeightCall(mock, identity, height, key, exactly) {
+        mock.expects('walletdApi')
+            .exactly(exactly || 1)
+            .withArgs('identity-keys-at-height', {
+                chainid: identity.id.toString('hex'),
+                height: height
+            })
+            .returns(Promise.resolve({ keys: [key] }));
+    }
 });

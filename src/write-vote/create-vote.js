@@ -8,11 +8,20 @@ const { getPublicAddress } = require('factom'),
 async function createVote(cli, voteData, ecAddress) {
     const { definition, registrationChainId, eligibleVoters, identity } = voteData;
 
+    if (!await cli.chainExists(registrationChainId)) {
+        throw new Error(`Registration chain ${registrationChainId} doesn't exist.`);
+    }
+
     const initiator = await getVoteIdentity(cli, identity);
     const defCopy = JSON.parse(JSON.stringify(definition));
     const chainsToCreate = [];
 
     if (!defCopy.vote.eligibleVotersChainId) {
+        const height = cli.getHeights().then(heights => heights.leaderHeight);
+
+        if (defCopy.vote.phasesBlockHeights.commitStart <= height) {
+            throw new Error(`Current height (${height}) is higher than commitStart height (${defCopy.vote.phasesBlockHeights.commitStart}) making your new eligible voters list unusable.`);
+        }
         const eligibleVotersChain = generateEligibleVotersChain(eligibleVoters || [], initiator);
         defCopy.vote.eligibleVotersChainId = eligibleVotersChain.idHex;
         chainsToCreate.push(eligibleVotersChain);

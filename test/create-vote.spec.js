@@ -14,7 +14,7 @@ describe('Create vote', function () {
         delete definition.vote.eligibleVotersChainId;
         const registrationChainId = 'a968e880ee3a7002f25ade15ae36a77c15f4dbc9d8c11fdd5fe86ba6af73a475';
         const eligibleVoters = require('./data/eligible-voters');
-        const identity = { chainId: '34704bd0fe5d8a6a7816fd5db9072580610a1b89406b3bc48b68b79c5fefb9b2', key: 'idsec2Vn3VT8FdE1YpcDms8zSvXR4DGzQeMMdeLRP2RbMCSWCFoQDbS' };
+        const identity = { chainId: '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', key: 'idsec2Vn3VT8FdE1YpcDms8zSvXR4DGzQeMMdeLRP2RbMCSWCFoQDbS' };
         const voteData = {
             definition, registrationChainId, eligibleVoters, identity
         };

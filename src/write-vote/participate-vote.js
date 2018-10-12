@@ -6,7 +6,6 @@ async function commitVote(cli, voteChainId, vote, identity, ecAddress) {
     // TODO: possible online validation (commitVoteSafe?):
     // config (possible options, min,max...)
     // voter is an eliglbe voter
-
     const voter = await getVoteIdentity(cli, identity);
     const entry = generateVoteCommitEntry(voteChainId, vote, voter);
     validateFunds(cli, entry.ecCost(), ecAddress, 'Cannot commit vote');

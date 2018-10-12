@@ -1,5 +1,7 @@
 const sign = require('tweetnacl/nacl-fast').sign,
+    Promise = require('bluebird'),
     { sha512 } = require('../crypto'),
+    { verifyIdentityKeyAssociation, keyToPublicIdentityKey } = require('../factom-identity'),
     { validateVoteDefinition, validateEligibleVoters, validateVote } = require('../validation/json-validation');
 
 /**
@@ -28,10 +30,10 @@ async function parseVoteChain(cli, chainId) {
 
     let definition, firstEntryContainsVoteDefinition = false;
     const commits = [], reveals = [], parseErrors = [];
-    await cli.rewindChainWhile(chainId, () => true, function (entry) {
+    await cli.rewindChainWhile(chainId, () => true, async function (entry) {
         firstEntryContainsVoteDefinition = false;
         try {
-            const parsed = parseVoteChainEntry(entry);
+            const parsed = await parseVoteChainEntry(cli, entry);
             switch (parsed.type) {
                 case 'definition':
                     definition = parsed;
@@ -64,12 +66,13 @@ async function parseVoteChain(cli, chainId) {
 async function parseEligibleVotersChain(cli, chainId) {
     const entries = await cli.getAllEntriesOfChain(chainId);
 
-    const initialEligibleVoters = parseInitialEligibleVotersEntry(entries[0]);
+    const initialEligibleVoters = await parseInitialEligibleVotersEntry(cli, entries[0]);
 
+    // Iterate over the append entries
     const appends = [], parseErrors = [];
-    entries.slice(1).forEach(function (entry) {
+    await Promise.each(entries.slice(1), async function (entry) {
         try {
-            appends.push(parseAppendEligibleVotersEntry(entry, initialEligibleVoters.identity, initialEligibleVoters.publicKey));
+            appends.push(await parseAppendEligibleVotersEntry(cli, entry, initialEligibleVoters.identity, initialEligibleVoters.publicKey));
         } catch (e) {
             parseErrors.push({ entryHash: entry.hashHex(), error: e });
         }
@@ -79,7 +82,7 @@ async function parseEligibleVotersChain(cli, chainId) {
 }
 
 
-function parseInitialEligibleVotersEntry(entry) {
+async function parseInitialEligibleVotersEntry(cli, entry) {
     if (entry.extIds.length !== 5) {
         throw new Error(`Invalid number of external ids for initial eligible voters entry ${entry.hashHex()}.`);
     }
@@ -88,8 +91,8 @@ function parseInitialEligibleVotersEntry(entry) {
         throw new Error(`Invalid header for initial eligible voters entry ${entry.hashHex()}`);
     }
 
-    // TODO: validate initiator identity and the key is valid at that block
-    // call API identity-keys-at-height using entry.blockContext
+    await verifyIdentityKeyAssociation(cli, entry.extIds[1].toString('hex'), keyToPublicIdentityKey(entry.extIds[3]), entry.blockContext.directoryBlockHeight);
+
     const signedData = sha512(Buffer.concat([entry.extIds[2], entry.content]));
     if (!sign.detached.verify(signedData, entry.extIds[4], entry.extIds[3])) {
         throw new Error(`Invalid signature of initial eligible voters entry ${entry.hashHex()}`);
@@ -109,13 +112,13 @@ function parseInitialEligibleVotersEntry(entry) {
     };
 }
 
-function parseAppendEligibleVotersEntry(entry, initiatorIdentity, publicKey) {
+async function parseAppendEligibleVotersEntry(cli, entry, initiatorIdentity, publicKey) {
     if (entry.extIds.length !== 2) {
         throw new Error(`Invalid number of external ids for append eligible voters entry ${entry.hashHex()}.`);
     }
 
-    // TODO: validate initiator identity and the key is valid at that block
-    // call API identity-keys-at-height using entry.blockContext
+    await verifyIdentityKeyAssociation(cli, initiatorIdentity, keyToPublicIdentityKey(publicKey), entry.blockContext.directoryBlockHeight);
+
     const signedData = sha512(Buffer.concat([entry.chainId, entry.extIds[0], entry.content]));
     if (!sign.detached.verify(signedData, entry.extIds[1], Buffer.from(publicKey, 'hex'))) {
         throw new Error(`Invalid signature of append eligible voters entry ${entry.hashHex()}`);
@@ -133,16 +136,16 @@ function parseAppendEligibleVotersEntry(entry, initiatorIdentity, publicKey) {
     };
 }
 
-function parseVoteChainEntry(entry) {
+function parseVoteChainEntry(cli, entry) {
     if (entry.extIds.length === 0) {
         throw new Error(`Entry [${entry.hashHex()}] is not a valid factom vote chain entry.`);
     }
 
     switch (entry.extIds[0].toString()) {
         case 'factom-vote':
-            return parseVoteDefinitionEntry(entry);
+            return parseVoteDefinitionEntry(cli, entry);
         case 'factom-vote-commit':
-            return parseVoteCommitEntry(entry);
+            return parseVoteCommitEntry(cli, entry);
         case 'factom-vote-reveal':
             return parseVoteRevealEntry(entry);
         default:
@@ -150,7 +153,7 @@ function parseVoteChainEntry(entry) {
     }
 }
 
-function parseVoteDefinitionEntry(entry) {
+async function parseVoteDefinitionEntry(cli, entry) {
     if (entry.extIds.length !== 5) {
         throw new Error(`Invalid number of external ids for vote definition entry ${entry.hashHex()}.`);
     }
@@ -158,8 +161,8 @@ function parseVoteDefinitionEntry(entry) {
         throw new Error(`Invalid header for vote definition entry ${entry.hashHex()}.`);
     }
 
-    // TODO: validate voter identity and the key is valid at that block
-    // call API identity-keys-at-height using entry.blockContext
+    await verifyIdentityKeyAssociation(cli, entry.extIds[2].toString('hex'), keyToPublicIdentityKey(entry.extIds[3]), entry.blockContext.directoryBlockHeight);
+
     const signedData = sha512(entry.content);
     if (!sign.detached.verify(signedData, entry.extIds[4], entry.extIds[3])) {
         throw new Error(`Invalid signature of vote definition entry ${entry.hashHex()}`);
@@ -178,7 +181,7 @@ function parseVoteDefinitionEntry(entry) {
     };
 }
 
-function parseVoteCommitEntry(entry) {
+async function parseVoteCommitEntry(cli, entry) {
     if (entry.extIds.length !== 4) {
         throw new Error(`Invalid number of external ids for vote commit entry ${entry.hashHex()}.`);
     }
@@ -186,8 +189,8 @@ function parseVoteCommitEntry(entry) {
         throw new Error(`Invalid header for vote commit entry ${entry.hashHex()}`);
     }
 
-    // TODO: validate voter identity and the key is valid at that block
-    // call API identity-keys-at-height using entry.blockContext
+    await verifyIdentityKeyAssociation(cli, entry.extIds[1].toString('hex'), keyToPublicIdentityKey(entry.extIds[2]), entry.blockContext.directoryBlockHeight);
+
     const signedData = sha512(Buffer.concat([entry.chainId, entry.content]));
     if (!sign.detached.verify(signedData, entry.extIds[3], entry.extIds[2])) {
         throw new Error(`Invalid signature of vote commit entry ${entry.hashHex()}.`);

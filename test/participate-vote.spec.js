@@ -17,7 +17,7 @@ describe('Participate vote', function () {
             secret: crypto.randomBytes(16).toString('hex'),
             hmacAlgo: 'sha512'
         };
-        const voter = { chainId: crypto.randomBytes(32), key: 'idsec1wnZ9FLheMDXZNnnDHXdqZcMiDrgg2hTNzdseNLwFnEot362c4' };
+        const voter = { chainId: '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', key: 'idsec1wnZ9FLheMDXZNnnDHXdqZcMiDrgg2hTNzdseNLwFnEot362c4' };
 
         const result = await participateVote.commitVote(cli, voteChainId, vote, voter, process.env.EC_PRIVATE_KEY);
         assert.isObject(result);

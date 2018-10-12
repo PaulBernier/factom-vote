@@ -6,6 +6,7 @@ const assert = require('chai').assert,
         getSecretIdentityKey,
         isValidIdentityKey,
         isValidPublicIdentityKey,
+        verifyIdentityKeyAssociation,
         isValidSecretIdentityKey } = require('../src/factom-identity');
 
 describe('Factom digital identities', function () {
@@ -54,7 +55,7 @@ describe('Factom digital identities', function () {
     });
 
     it('Should get vote identity', async function () {
-        const CHAIN_ID = '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679',
+        const CHAIN_ID = '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635',
             PUB_KEY = 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz',
             SEC_KEY = 'idsec1wnZ9FLheMDXZNnnDHXdqZcMiDrgg2hTNzdseNLwFnEot362c4';
 
@@ -64,13 +65,13 @@ describe('Factom digital identities', function () {
             .once()
             .withArgs('identity-key', { public: PUB_KEY })
             .returns(Promise.resolve({ secret: SEC_KEY }));
-        // mock.expects('getHeights')
-        //     .once()
-        //     .returns(Promise.resolve({ leaderHeight: 1989 }));
-        // mock.expects('walletdApi')
-        //     .once()
-        //     .withArgs('identity-keys-at-height', { chainid: CHAIN_ID, height: 1988 })
-        //     .returns(Promise.resolve({ keys: [PUB_KEY] }));
+        mock.expects('getHeights')
+            .once()
+            .returns(Promise.resolve({ leaderHeight: 1989 }));
+        mock.expects('walletdApi')
+            .once()
+            .withArgs('identity-keys-at-height', { chainid: CHAIN_ID, height: 1988 })
+            .returns(Promise.resolve({ keys: [PUB_KEY] }));
 
         const voteIdentity = await getVoteIdentity(cli, { chainId: CHAIN_ID, key: PUB_KEY });
 
@@ -78,4 +79,54 @@ describe('Factom digital identities', function () {
         assert.equal(voteIdentity.id, CHAIN_ID);
         assert.deepEqual(voteIdentity.secretKey, Buffer.from('67fe571d8cbad2c0d0d10b295301eaf631d43ff82f21c7f161448f220ad22c66', 'hex'));
     });
+
+    it('Should accept identity key association at current height', async function () {
+        const cli = new FactomCli();
+        const mock = sinon.mock(cli);
+        mock.expects('getHeights')
+            .once()
+            .returns(Promise.resolve({ leaderHeight: 1989 }));
+        expectIdentityKeysAtHeightCall(mock, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 1988, 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz');
+
+        await verifyIdentityKeyAssociation(cli, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz');
+
+        mock.verify();
+    });
+
+    it('Should accept identity key association at given height', async function () {
+        const cli = new FactomCli();
+        const mock = sinon.mock(cli);
+        mock.expects('getHeights').never();
+        expectIdentityKeysAtHeightCall(mock, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 7, 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz');
+
+        await verifyIdentityKeyAssociation(cli, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz', 7);
+
+        mock.verify();
+    });
+
+    it('Should reject identity key association', async function () {
+        const cli = new FactomCli();
+        const mock = sinon.mock(cli);
+        expectIdentityKeysAtHeightCall(mock, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 7, 'idpub3bjJcyp2CgzamFdCdpM7JBLuWoBz7kdk7iHKwDXb3i7qaap848');
+
+        try {
+            await verifyIdentityKeyAssociation(cli, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz', 7);
+        } catch(e) {
+            assert.instanceOf(e, Error);
+            mock.verify();
+            return;
+        }
+
+        throw new Error('Should have throw');
+    });
+
+    function expectIdentityKeysAtHeightCall(mock, chainId, height, key, exactly) {
+        mock.expects('walletdApi')
+            .exactly(exactly || 1)
+            .withArgs('identity-keys-at-height', {
+                chainid: chainId,
+                height: height
+            })
+            .returns(Promise.resolve({ keys: [key] }));
+    }
 });
