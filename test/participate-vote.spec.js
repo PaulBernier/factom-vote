@@ -1,5 +1,4 @@
 const { FactomCli, Entry } = require('factom'),
-    assert = require('chai').assert,
     sinon = require('sinon'),
     crypto = require('crypto'),
     { keyToSecretIdentityKey, getPublicIdentityKey } = require('../src/factom-identity'),
@@ -14,7 +13,7 @@ describe('Participate vote', function () {
     it('should commit vote', async function () {
         const voteChainId = 'c973b2db5a4959c64606f7df7903918737f226a0ffaf93911f192582878b29eb';
         const vote = {
-            vote: ['yes', 'maybe'],
+            vote: ['yes', 'no'],
             secret: crypto.randomBytes(16).toString('hex'),
             hmacAlgo: 'sha512'
         };

@@ -4,10 +4,9 @@ const { getPublicAddress } = require('factom'),
     { generateVoteCommitEntry, generateVoteRevealEntry } = require('./participate-vote-struct');
 
 async function commitVote(cli, voteChainId, vote, identity, ecAddress) {
-    // TODO: possible online validation (commitVoteSafe?):
-    // config (possible options, min,max...)
-    // voter is an eliglbe voter
+
     const definition = await getVoteDefinition(cli, voteChainId);
+    validateOptions(definition.data.vote.config, vote.vote);
     const { commitStart, commitEnd } = definition.data.vote.phasesBlockHeights;
     await validateBlockHeightInterval(cli, 'commit', commitStart, commitEnd);
 
@@ -18,10 +17,20 @@ async function commitVote(cli, voteChainId, vote, identity, ecAddress) {
     return cli.add(entry, ecAddress);
 }
 
-async function revealVote(cli, voteChainId, vote, voterId, ecAddress) {
-    // TODO: possible online validation (revealVoteSafe?):
-    // reveal match the commit
+function validateOptions(config, voterOptions) {
+    const validNumberOfOptionsSelected = (config.allowAbstention && voterOptions.length === 0) ||
+        (voterOptions.length >= config.minOptions && voterOptions.length <= config.maxOptions);
 
+    if (!validNumberOfOptionsSelected) {
+        throw new Error(`Invalid number of options selected. Min: ${config.minOptions}. Max: ${config.maxOptions}. Abstention allowed: ${config.allowAbstention}.`);
+    }
+
+    if (!voterOptions.every(o => config.options.includes(o))) {
+        throw new Error('At least one of the selected options is not part of the vote available options.');
+    }
+}
+
+async function revealVote(cli, voteChainId, vote, voterId, ecAddress) {
     const definition = await getVoteDefinition(cli, voteChainId);
     const { revealStart, revealEnd } = definition.data.vote.phasesBlockHeights;
     await validateBlockHeightInterval(cli, 'commit', revealStart, revealEnd);
