@@ -13,27 +13,27 @@ class FactomVoteManager {
         }
     }
 
-    async createVoteRegistrationChain(ecAddress, nonce) {
+    createVoteRegistrationChain(ecAddress, nonce) {
         return createVoteRegistrationChain(this.cli, nonce, ecAddress);
     }
 
-    async createVote(voteData, ecAddress) {
+    createVote(voteData, ecAddress) {
         return createVote(this.cli, voteData, ecAddress);
     }
 
-    async appendEligibleVoters(appendEligibleVotersData, ecAddress) {
+    appendEligibleVoters(appendEligibleVotersData, ecAddress) {
         return appendEligibleVoters(this.cli, appendEligibleVotersData, ecAddress);
     }
 
-    async getVote(chainId) {
+    getVote(chainId) {
         return getVote(this.cli, chainId);
     }
 
-    async commitVote(voteChainId, vote, voter, ecAddress) {
+    commitVote(voteChainId, vote, voter, ecAddress) {
         return commitVote(this.cli, voteChainId, vote, voter, ecAddress);
     }
 
-    async revealVote(voteChainId, vote, voterId, ecAddress) {
+    revealVote(voteChainId, vote, voterId, ecAddress) {
         return revealVote(this.cli, voteChainId, vote, voterId, ecAddress);
     }
 

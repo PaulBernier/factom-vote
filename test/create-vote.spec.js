@@ -10,9 +10,9 @@ describe('Create vote', function () {
 
     it('should create a vote', async function () {
         this.timeout(20000);
-        const definition = JSON.parse(JSON.stringify(require('./data/vote-definition')));
-        delete definition.vote.eligibleVotersChainId;
+
         const registrationChainId = 'a968e880ee3a7002f25ade15ae36a77c15f4dbc9d8c11fdd5fe86ba6af73a475';
+        const definition = await getVoteDefinition();
         const eligibleVoters = require('./data/eligible-voters');
         const identity = { chainId: '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', key: 'idsec2Vn3VT8FdE1YpcDms8zSvXR4DGzQeMMdeLRP2RbMCSWCFoQDbS' };
         const voteData = {
@@ -25,6 +25,21 @@ describe('Create vote', function () {
         assert.isObject(result.vote);
         assert.isObject(result.registration);
     });
+
+    async function getVoteDefinition() { 
+        const definition = JSON.parse(JSON.stringify(require('./data/vote-definition')));
+        delete definition.vote.eligibleVotersChainId;
+        const currentHeight = await cli.getHeights().then(h => h.leaderHeight);
+
+        definition.vote.phasesBlockHeights = {
+            commitStart: currentHeight + 10,
+            commitEnd: currentHeight + 20,
+            revealStart: currentHeight + 30,
+            revealEnd: currentHeight + 40
+        };
+
+        return definition;
+    }
 
     xit('should append eligible voters', async function () {
         this.timeout(10000);
