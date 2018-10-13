@@ -117,5 +117,9 @@ function getValidVotes(validCommits, validReveals) {
 }
 
 module.exports = {
-    processParsedVote
+    processParsedVote,
+    getEligibleVoters,
+    getValidCommits,
+    getValidReveals,
+    getValidVotes
 };
