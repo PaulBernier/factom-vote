@@ -45,19 +45,19 @@
                 "commitEnd": {
                     "type": "integer",
                     "minimum": {
-                        "$data": "1/commitStartBlockHeight"
+                        "$data": "1/commitStart"
                     }
                 },
                 "revealStart": {
                     "type": "integer",
-                    "minimum": {
-                        "$data": "1/commitEndBlockHeight"
+                    "exclusiveMinimum": {
+                        "$data": "1/commitEnd"
                     }
                 },
                 "revealEnd": {
                     "type": "integer",
                     "minimum": {
-                        "$data": "1/revealStartBlockHeight"
+                        "$data": "1/revealStart"
                     }
                 }
             }
