@@ -3,8 +3,15 @@ const { validateVoteDefinition, validateVote, validateEligibleVoters } = require
 
 describe('Validate JSONs', function () {
 
-    it('should validate a complete vote definition JSON', function () {
+    it('should validate a complete vote definition JSON with text', function () {
         const voteDef = require('./data/vote-definition.json');
+        if (!validateVoteDefinition(voteDef)) {
+            throw new Error(JSON.stringify(validateVoteDefinition.errors, null, 4));
+        }
+    });
+
+    it('should validate a complete vote definition JSON with href', function () {
+        const voteDef = require('./data/vote-definition.2.json');
         if (!validateVoteDefinition(voteDef)) {
             throw new Error(JSON.stringify(validateVoteDefinition.errors, null, 4));
         }

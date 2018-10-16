@@ -6,7 +6,7 @@
     "required": [
         "title"
     ],
-    "anyOf": [
+    "oneOf": [
         {
             "required": [
                 "text"

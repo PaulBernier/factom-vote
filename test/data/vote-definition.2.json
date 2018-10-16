@@ -1,7 +1,13 @@
 {
     "proposal": {
         "title": "Is the on-chain voting grant a success?",
-        "text": "Please tell if you think this grant was a success"
+        "externalRef": {
+            "href": "https://the-voting-grant/vote",
+            "hash": {
+                "value": "b950beb02d45cc9c96c198243af669b3dc57d31de994d655f506372fdec3a885",
+                "algo": "sha256"
+            }
+        }
     },
     "vote": {
         "phasesBlockHeights": {
