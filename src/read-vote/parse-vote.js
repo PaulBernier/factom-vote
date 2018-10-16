@@ -69,10 +69,16 @@ async function parseEligibleVotersChain(cli, chainId) {
     const initialEligibleVoters = await parseInitialEligibleVotersEntry(cli, entries[0]);
 
     // Iterate over the append entries
-    const appends = [], parseErrors = [];
+    const appends = [], parseErrors = [], entryHashes = new Set();
     await Promise.each(entries.slice(1), async function (entry) {
         try {
-            appends.push(await parseAppendEligibleVotersEntry(cli, entry, initialEligibleVoters.identity, initialEligibleVoters.publicKey));
+            if (entryHashes.has(entry.hashHex())) {
+                // Skip entry replayed
+                parseErrors.push({ entryHash: entry.hashHex(), error: 'Replayed entry' });
+            } else {
+                appends.push(await parseAppendEligibleVotersEntry(cli, entry, initialEligibleVoters.identity, initialEligibleVoters.publicKey));
+                entryHashes.add(entry.hashHex());
+            }
         } catch (e) {
             parseErrors.push({ entryHash: entry.hashHex(), error: e });
         }

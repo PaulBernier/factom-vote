@@ -39,7 +39,7 @@ describe('Parse vote', function () {
         expectIdentityKeysAtHeightCall(mock, initiator, 2, initiatorPublicIdentityKey);
 
         const { eligibleVotersRegitrations, parseErrors } = await parseEligibleVotersChain(cli, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
-        
+
         mock.verify();
         assert.lengthOf(eligibleVotersRegitrations, 2);
         assert.lengthOf(parseErrors, 1);
@@ -52,6 +52,44 @@ describe('Parse vote', function () {
         assert.equal(registration2.type, 'append-eligible-voters');
         assert.deepEqual(registration2.data, appendVoters);
         assert.equal(registration2.blockContext.directoryBlockHeight, 2);
+    });
+
+    it('Should skip replayed entries', async function () {
+
+        const initiator = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
+        const initiatorPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(initiator.secretKey));
+        const initialVoters = [{ voterId: 'ID_1', weight: 22 }, { voterId: 'ID_2' }];
+        const appendVoters = [{ voterId: 'ID_1', weight: 0 }, { voterId: 'ID_3' }];
+
+        const firstEntry = Entry.builder(generateEligibleVotersChain(initialVoters, initiator).firstEntry)
+            .blockContext({ directoryBlockHeight: 1 })
+            .build();
+
+        const appendEntry = Entry.builder(generateAppendEligibleVotersEntry(appendVoters, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', initiator.secretKey))
+            .blockContext({ directoryBlockHeight: 2 })
+            .build();
+        const duplicateEntry = Entry.builder(appendEntry)
+            .blockContext({ directoryBlockHeight: 3 })
+            .build();
+
+        const cli = new FactomCli();
+        const mock = sinon.mock(cli);
+        mock.expects('getAllEntriesOfChain')
+            .once()
+            .withArgs('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679')
+            .returns(Promise.resolve([firstEntry, appendEntry, duplicateEntry]));
+        mock.expects('getHeights').never();
+        expectIdentityKeysAtHeightCall(mock, initiator, 1, initiatorPublicIdentityKey);
+        expectIdentityKeysAtHeightCall(mock, initiator, 2, initiatorPublicIdentityKey);
+
+        const { eligibleVotersRegitrations, parseErrors } = await parseEligibleVotersChain(cli, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
+
+        mock.verify();
+        assert.lengthOf(eligibleVotersRegitrations, 2);
+        assert.lengthOf(parseErrors, 1);
+        assert.equal(eligibleVotersRegitrations[1].blockContext.directoryBlockHeight, 2);
+        assert.equal(parseErrors[0].error, 'Replayed entry');
+
     });
 
     it('Should parse vote definition entry', async function () {
