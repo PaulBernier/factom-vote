@@ -113,14 +113,18 @@ async function parseInitialEligibleVotersEntry(cli, entry) {
 }
 
 async function parseAppendEligibleVotersEntry(cli, entry, initiatorIdentity, publicKey) {
-    if (entry.extIds.length !== 2) {
+    if (entry.extIds.length !== 3) {
         throw new Error(`Invalid number of external ids for append eligible voters entry ${entry.hashHex()}.`);
+    }
+    if (entry.extIds[0].toString() !== 'factom-vote-eligible-voters' ||
+        entry.extIds[1].length !== 32) {
+        throw new Error(`Invalid header for initial eligible voters entry ${entry.hashHex()}`);
     }
 
     await verifyIdentityKeyAssociation(cli, initiatorIdentity, keyToPublicIdentityKey(publicKey), entry.blockContext.directoryBlockHeight);
 
-    const signedData = sha512(Buffer.concat([entry.chainId, entry.extIds[0], entry.content]));
-    if (!sign.detached.verify(signedData, entry.extIds[1], Buffer.from(publicKey, 'hex'))) {
+    const signedData = sha512(Buffer.concat([entry.chainId, entry.extIds[1], entry.content]));
+    if (!sign.detached.verify(signedData, entry.extIds[2], Buffer.from(publicKey, 'hex'))) {
         throw new Error(`Invalid signature of append eligible voters entry ${entry.hashHex()}`);
     }
 

@@ -65,6 +65,7 @@ function generateAppendEligibleVotersEntry(eligibleVoters, eligibleVotersChainId
 
     return Entry.builder()
         .chainId(eligibleVotersChainId)
+        .extId('factom-vote-eligible-voters', 'utf8')
         .extId(nonce)
         .extId(signature)
         .content(content, 'utf8')

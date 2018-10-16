@@ -64,14 +64,15 @@ describe('Create vote structures', function () {
         const entry = createVote.generateAppendEligibleVotersEntry(eligibleVoters, eligibleVotersChainId, initiatorSecretKey, EC_PRIVATE_ADDRESS);
 
         assert.instanceOf(entry, Entry);
-        assert.lengthOf(entry.extIds, 2);
+        assert.lengthOf(entry.extIds, 3);
         assert.equal(entry.chainIdHex, eligibleVotersChainId);
 
-        assert.lengthOf(entry.extIds[0], 32);
+        assert.equal(entry.extIds[0].toString('utf8'), 'factom-vote-eligible-voters');
+        assert.lengthOf(entry.extIds[1], 32);
 
         const publicKey = sign.keyPair.fromSeed(Buffer.from(initiatorSecretKey, 'hex')).publicKey;
-        const dataSigned = crypto.createHash('sha512').update(Buffer.concat([Buffer.from(eligibleVotersChainId, 'hex'), entry.extIds[0], entry.content])).digest();
-        assert.isTrue(sign.detached.verify(dataSigned, entry.extIds[1], publicKey));
+        const dataSigned = crypto.createHash('sha512').update(Buffer.concat([Buffer.from(eligibleVotersChainId, 'hex'), entry.extIds[1], entry.content])).digest();
+        assert.isTrue(sign.detached.verify(dataSigned, entry.extIds[2], publicKey));
         assert.deepEqual(JSON.parse(entry.content.toString()), eligibleVoters);
     });
 

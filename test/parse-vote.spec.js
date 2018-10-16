@@ -39,6 +39,7 @@ describe('Parse vote', function () {
         expectIdentityKeysAtHeightCall(mock, initiator, 2, initiatorPublicIdentityKey);
 
         const { eligibleVotersRegitrations, parseErrors } = await parseEligibleVotersChain(cli, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
+        
         mock.verify();
         assert.lengthOf(eligibleVotersRegitrations, 2);
         assert.lengthOf(parseErrors, 1);
