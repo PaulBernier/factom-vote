@@ -15,8 +15,7 @@
         "config": {
             "options": [
                 "yes",
-                "no",
-                "maybe"
+                "no"
             ],
             "minOptions": 1,
             "maxOptions": 2,
@@ -24,14 +23,13 @@
                 "minTurnout": {
                     "weighted": 0.3,
                     "unweighted": 0.5
-                },
+                }
+            },
+            "winnerCriteria": {
                 "minSupport": {
                     "yes": {
                         "weighted": 0.6,
                         "unweighted": 0.9
-                    },
-                    "no": {
-                        "weighted": 0.3
                     }
                 }
             },

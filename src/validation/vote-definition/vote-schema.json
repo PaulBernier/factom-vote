@@ -24,6 +24,40 @@
                     "maximum": 1
                 }
             }
+        },
+        "type0": {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": 0
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "config": {
+                        "properties": {
+                            "options": {
+                                "minItems": 2,
+                                "maxItems": 2
+                            },
+                            "winnerCriteria": {
+                                "properties": {
+                                    "minSupport": {
+                                        "minProperties": 1,
+                                        "maxProperties": 1,
+                                        "propertyNames": {
+                                            "enum": {
+                                                "$data": "3/options"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "additionalProperties": false,
@@ -69,7 +103,8 @@
         "type": {
             "enum": [
                 0,
-                1
+                1,
+                2
             ]
         },
         "config": {
@@ -109,9 +144,29 @@
                     "properties": {
                         "minTurnout": {
                             "$ref": "#/definitions/weightedUnweighted"
-                        },
+                        }
+                    }
+                },
+                "winnerCriteria": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
                         "minSupport": {
                             "type": "object",
+                            "oneOf": [
+                                {
+                                    "propertyNames": {
+                                        "enum": {
+                                            "$data": "3/options"
+                                        }
+                                    }
+                                },
+                                {
+                                    "propertyNames": {
+                                        "const": "*"
+                                    }
+                                }
+                            ],
                             "patternProperties": {
                                 ".*": {
                                     "$ref": "#/definitions/weightedUnweighted"
@@ -131,5 +186,10 @@
                 }
             }
         }
-    }
+    },
+    "allOf": [
+        {
+            "$ref": "#/definitions/type0"
+        }
+    ]
 }

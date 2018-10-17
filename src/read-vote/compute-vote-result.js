@@ -1,16 +1,34 @@
+const { computeBinaryVotingWinner, computeApprovalVotingWinner } = require('./compute-vote-winner');
+
 function computeResult(vote) {
     const { definition, eligibleVoters, validVotes } = vote;
     switch (definition.type) {
         case 0:
-            return computeApprovalVotingResult(definition.config, eligibleVoters, validVotes);
+            return computeBinaryVotingResult(definition.config, eligibleVoters, validVotes);
         case 1:
+            return computeApprovalVotingResult(definition.config, eligibleVoters, validVotes);
+        case 2:
             return computeIRVResult(definition.config, validVotes);
         default:
             throw new Error(`Unsupported vote type [${definition.type}]`);
     }
 }
 
+function computeBinaryVotingResult(voteConfig, votersWeight, votes) {
+    const stats = computeNonOrderedVoteStats(voteConfig, votersWeight, votes);
+    const winner = computeBinaryVotingWinner(stats.options, voteConfig.winnerCriteria);
+
+    return Object.assign(stats, { winner });
+}
+
 function computeApprovalVotingResult(voteConfig, votersWeight, votes) {
+    const stats = computeNonOrderedVoteStats(voteConfig, votersWeight, votes);
+    const winner = computeApprovalVotingWinner(stats.options, voteConfig.winnerCriteria);
+
+    return Object.assign(stats, { winner });
+}
+
+function computeNonOrderedVoteStats(voteConfig, votersWeight, votes) {
     // Initialize result data
     const abstention = { count: 0, weight: 0 };
     const optionsResult = {};
