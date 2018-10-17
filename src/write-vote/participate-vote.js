@@ -50,10 +50,10 @@ async function validateFunds(cli, ecCost, ecAddress, message) {
 }
 
 async function validateBlockHeightInterval(cli, action, start, end) {
-    const currentHeight = await cli.getHeights().then(h => h.leaderHeight);
+    const currentHeight = await cli.getHeights().then(h => h.leaderHeight + 1);
 
     if (currentHeight < start || currentHeight > end) {
-        throw new Error(`Current block height ${currentHeight} is not within the block height range of the vote ${action}:  [${start}, ${end}]`);
+        throw new Error(`The height of the current block being built ${currentHeight} is not within the block height range of the vote ${action}:  [${start}, ${end}]`);
     }
 }
 

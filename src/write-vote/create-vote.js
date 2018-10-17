@@ -19,8 +19,8 @@ async function createVote(cli, voteData, ecAddress) {
     if (!defCopy.vote.eligibleVotersChainId) {
         const height = await cli.getHeights().then(heights => heights.leaderHeight);
 
-        if (defCopy.vote.phasesBlockHeights.commitStart <= height) {
-            throw new Error(`Current height (${height}) is higher than commitStart height (${defCopy.vote.phasesBlockHeights.commitStart}) making your new eligible voters list unusable.`);
+        if (defCopy.vote.phasesBlockHeights.commitStart <= height + 1) {
+            throw new Error(`The height of the current block being built (${height + 1}) is higher or equal to commitStart (${defCopy.vote.phasesBlockHeights.commitStart}) making your new eligible voters list unusable.`);
         }
         const eligibleVotersChain = generateEligibleVotersChain(eligibleVoters || [], initiator);
         defCopy.vote.eligibleVotersChainId = eligibleVotersChain.idHex;
