@@ -13,6 +13,19 @@ class FactomVoteManager {
         }
     }
 
+    async verifyConnections() {
+        try {
+            await this.cli.factomdApi('properties');
+        } catch(e) {
+            throw new Error(`Failed to connect to factomd: ${e.message}`);
+        }
+        try {
+            await this.cli.walletdApi('properties');
+        } catch(e) {
+            throw new Error(`Failed to connect to walletd: ${e.message}`);
+        }    
+    }
+
     createVoteRegistrationChain(ecAddress, nonce) {
         return createVoteRegistrationChain(this.cli, nonce, ecAddress);
     }
