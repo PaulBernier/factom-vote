@@ -5,7 +5,7 @@ const { getPublicAddress } = require('factom'),
         generateAppendEligibleVotersEntry } = require('./create-vote-struct'),
     { getVoteIdentity, extractKey, getPublicIdentityKey, getSecretIdentityKey } = require('../factom-identity');
 
-async function createVote(cli, identityResolvers, voteData, ecAddress) {
+async function createVote(cli, identityResolvers, voteData, ecAddress, skipValidation) {
     const { definition, registrationChainId, eligibleVoters, identity } = voteData;
 
     if (!await cli.chainExists(registrationChainId)) {
@@ -17,11 +17,15 @@ async function createVote(cli, identityResolvers, voteData, ecAddress) {
     const chainsToCreate = [];
 
     if (!defCopy.vote.eligibleVotersChainId) {
-        const height = await cli.getHeights().then(heights => heights.leaderHeight);
 
-        if (defCopy.vote.phasesBlockHeights.commitStart <= height + 1) {
-            throw new Error(`The height of the current block being built (${height + 1}) is higher or equal to commitStart (${defCopy.vote.phasesBlockHeights.commitStart}) making your new eligible voters list unusable.`);
+        if (!skipValidation) {
+            const height = await cli.getHeights().then(heights => heights.leaderHeight);
+
+            if (defCopy.vote.phasesBlockHeights.commitStart <= height + 1) {
+                throw new Error(`The height of the current block being built (${height + 1}) is higher or equal to commitStart (${defCopy.vote.phasesBlockHeights.commitStart}) making your new eligible voters list unusable.`);
+            }
         }
+
         const eligibleVotersChain = generateEligibleVotersChain(eligibleVoters || [], initiator);
         defCopy.vote.eligibleVotersChainId = eligibleVotersChain.idHex;
         chainsToCreate.push(eligibleVotersChain);
@@ -44,12 +48,14 @@ async function createVote(cli, identityResolvers, voteData, ecAddress) {
     };
 }
 
-async function appendEligibleVoters(cli, privateKeyResolver, appendEligibleVotersData, ecAddress) {
+async function appendEligibleVoters(cli, privateKeyResolver, appendEligibleVotersData, ecAddress, skipValidation) {
     const { eligibleVoters, eligibleVotersChainId, identityKey } = appendEligibleVotersData;
 
-    const canAppend = await canAppendEligibleVoters(cli, eligibleVotersChainId, identityKey);
-    if (!canAppend) {
-        throw new Error(`The initiator secret key is not authorized to add eligible voters to [${eligibleVotersChainId}].`);
+    if (!skipValidation) {
+        const canAppend = await canAppendEligibleVoters(cli, eligibleVotersChainId, identityKey);
+        if (!canAppend) {
+            throw new Error(`The initiator secret key is not authorized to add eligible voters to [${eligibleVotersChainId}].`);
+        }
     }
 
     const secretKey = extractKey(await getSecretIdentityKey(privateKeyResolver, identityKey));

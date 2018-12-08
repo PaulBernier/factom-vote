@@ -3,12 +3,14 @@ const { getPublicAddress } = require('factom'),
     { getVoteDefinition } = require('../read-vote/read-vote'),
     { generateVoteCommitEntry, generateVoteRevealEntry } = require('./participate-vote-struct');
 
-async function commitVote(cli, identityResolvers, voteChainId, vote, identity, ecAddress) {
+async function commitVote(cli, identityResolvers, voteChainId, vote, identity, ecAddress, skipValidation) {
 
-    const definition = await getVoteDefinition(cli, identityResolvers.publicKeysResolver, voteChainId);
-    validateOptions(definition.data.vote.config, vote.vote);
-    const { commitStart, commitEnd } = definition.data.vote.phasesBlockHeights;
-    await validateBlockHeightInterval(cli, 'commit', commitStart, commitEnd);
+    if (!skipValidation) {
+        const definition = await getVoteDefinition(cli, identityResolvers.publicKeysResolver, voteChainId);
+        validateOptions(definition.data.vote.config, vote.vote);
+        const { commitStart, commitEnd } = definition.data.vote.phasesBlockHeights;
+        await validateBlockHeightInterval(cli, 'commit', commitStart, commitEnd);
+    }
 
     const voter = await getVoteIdentity(identityResolvers, identity);
     const entry = generateVoteCommitEntry(voteChainId, vote, voter);
@@ -30,10 +32,12 @@ function validateOptions(config, voterOptions) {
     }
 }
 
-async function revealVote(cli, publicKeysResolver, voteChainId, vote, voterId, ecAddress) {
-    const definition = await getVoteDefinition(cli, publicKeysResolver, voteChainId);
-    const { revealStart, revealEnd } = definition.data.vote.phasesBlockHeights;
-    await validateBlockHeightInterval(cli, 'commit', revealStart, revealEnd);
+async function revealVote(cli, publicKeysResolver, voteChainId, vote, voterId, ecAddress, skipValidation) {
+    if (!skipValidation) {
+        const definition = await getVoteDefinition(cli, publicKeysResolver, voteChainId);
+        const { revealStart, revealEnd } = definition.data.vote.phasesBlockHeights;
+        await validateBlockHeightInterval(cli, 'commit', revealStart, revealEnd);
+    }
 
     const entry = generateVoteRevealEntry(voteChainId, vote, voterId);
     validateFunds(cli, entry.ecCost(), ecAddress, 'Cannot reveal vote');

@@ -36,24 +36,24 @@ class FactomVoteManager {
         return createVoteRegistrationChain(this.cli, nonce, ecAddress);
     }
 
-    createVote(voteData, ecAddress) {
-        return createVote(this.cli, this.identityResolvers, voteData, ecAddress);
+    createVote(voteData, ecAddress, skipValidation) {
+        return createVote(this.cli, this.identityResolvers, voteData, ecAddress, skipValidation);
     }
 
-    appendEligibleVoters(appendEligibleVotersData, ecAddress) {
-        return appendEligibleVoters(this.cli, this.identityResolvers.privateKeyResolver, appendEligibleVotersData, ecAddress);
+    appendEligibleVoters(appendEligibleVotersData, ecAddress, skipValidation) {
+        return appendEligibleVoters(this.cli, this.identityResolvers.privateKeyResolver, appendEligibleVotersData, ecAddress, skipValidation);
     }
 
     getVote(chainId) {
         return getVote(this.cli, this.identityResolvers.publicKeysResolver, chainId);
     }
 
-    commitVote(voteChainId, vote, voter, ecAddress) {
-        return commitVote(this.cli, this.identityResolvers, voteChainId, vote, voter, ecAddress);
+    commitVote(voteChainId, vote, voter, ecAddress, skipValidation) {
+        return commitVote(this.cli, this.identityResolvers, voteChainId, vote, voter, ecAddress, skipValidation);
     }
 
-    revealVote(voteChainId, vote, voterId, ecAddress) {
-        return revealVote(this.cli, this.identityResolvers.publicKeysResolver, voteChainId, vote, voterId, ecAddress);
+    revealVote(voteChainId, vote, voterId, ecAddress, skipValidation) {
+        return revealVote(this.cli, this.identityResolvers.publicKeysResolver, voteChainId, vote, voterId, ecAddress, skipValidation);
     }
 
 }
