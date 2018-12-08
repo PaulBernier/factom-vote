@@ -3,14 +3,14 @@ const { getPublicAddress } = require('factom'),
     { getVoteDefinition } = require('../read-vote/read-vote'),
     { generateVoteCommitEntry, generateVoteRevealEntry } = require('./participate-vote-struct');
 
-async function commitVote(cli, voteChainId, vote, identity, ecAddress) {
+async function commitVote(cli, identityResolvers, voteChainId, vote, identity, ecAddress) {
 
-    const definition = await getVoteDefinition(cli, voteChainId);
+    const definition = await getVoteDefinition(cli, identityResolvers.publicKeysResolver, voteChainId);
     validateOptions(definition.data.vote.config, vote.vote);
     const { commitStart, commitEnd } = definition.data.vote.phasesBlockHeights;
     await validateBlockHeightInterval(cli, 'commit', commitStart, commitEnd);
 
-    const voter = await getVoteIdentity(cli, identity);
+    const voter = await getVoteIdentity(identityResolvers, identity);
     const entry = generateVoteCommitEntry(voteChainId, vote, voter);
     validateFunds(cli, entry.ecCost(), ecAddress, 'Cannot commit vote');
 
@@ -30,8 +30,8 @@ function validateOptions(config, voterOptions) {
     }
 }
 
-async function revealVote(cli, voteChainId, vote, voterId, ecAddress) {
-    const definition = await getVoteDefinition(cli, voteChainId);
+async function revealVote(cli, publicKeysResolver, voteChainId, vote, voterId, ecAddress) {
+    const definition = await getVoteDefinition(cli, publicKeysResolver, voteChainId);
     const { revealStart, revealEnd } = definition.data.vote.phasesBlockHeights;
     await validateBlockHeightInterval(cli, 'commit', revealStart, revealEnd);
 

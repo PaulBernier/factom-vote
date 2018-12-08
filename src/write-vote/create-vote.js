@@ -5,14 +5,14 @@ const { getPublicAddress } = require('factom'),
         generateAppendEligibleVotersEntry } = require('./create-vote-struct'),
     { getVoteIdentity, extractKey, getPublicIdentityKey, getSecretIdentityKey } = require('../factom-identity');
 
-async function createVote(cli, voteData, ecAddress) {
+async function createVote(cli, identityResolvers, voteData, ecAddress) {
     const { definition, registrationChainId, eligibleVoters, identity } = voteData;
 
     if (!await cli.chainExists(registrationChainId)) {
         throw new Error(`Registration chain ${registrationChainId} doesn't exist.`);
     }
 
-    const initiator = await getVoteIdentity(cli, identity);
+    const initiator = await getVoteIdentity(identityResolvers, identity);
     const defCopy = JSON.parse(JSON.stringify(definition));
     const chainsToCreate = [];
 
@@ -38,13 +38,13 @@ async function createVote(cli, voteData, ecAddress) {
     const registration = await cli.add(registrationEntry, ecAddress);
 
     return {
-        eligibleVoters: eligibleVotersChainAdded,
+        eligibleVoters: eligibleVotersChainAdded || { chainId: defCopy.vote.eligibleVotersChainId },
         vote: voteChainAdded,
         registration
     };
 }
 
-async function appendEligibleVoters(cli, appendEligibleVotersData, ecAddress) {
+async function appendEligibleVoters(cli, privateKeyResolver, appendEligibleVotersData, ecAddress) {
     const { eligibleVoters, eligibleVotersChainId, identityKey } = appendEligibleVotersData;
 
     const canAppend = await canAppendEligibleVoters(cli, eligibleVotersChainId, identityKey);
@@ -52,7 +52,7 @@ async function appendEligibleVoters(cli, appendEligibleVotersData, ecAddress) {
         throw new Error(`The initiator secret key is not authorized to add eligible voters to [${eligibleVotersChainId}].`);
     }
 
-    const secretKey = extractKey(await getSecretIdentityKey(cli, identityKey));
+    const secretKey = extractKey(await getSecretIdentityKey(privateKeyResolver, identityKey));
     const entry = generateAppendEligibleVotersEntry(eligibleVoters, eligibleVotersChainId, secretKey);
     await validateFunds(cli, entry.ecCost(), ecAddress, 'Cannot append eligible voters');
 

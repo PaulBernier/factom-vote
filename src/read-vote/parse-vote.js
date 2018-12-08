@@ -12,10 +12,10 @@ const sign = require('tweetnacl/nacl-fast').sign,
  * BUT those functions don't check the validity of the data against the vote definition. This part is done at the next step (processRawVote)
  */
 
-async function parseVote(cli, chainId) {
-    const { definition, commits, reveals } = await parseVoteChain(cli, chainId);
+async function parseVote(cli, publicKeysResolver, chainId) {
+    const { definition, commits, reveals } = await parseVoteChain(cli, publicKeysResolver, chainId);
     const eligibleVotersChainId = definition.data.vote.eligibleVotersChainId;
-    const { eligibleVotersRegitrations } = await parseEligibleVotersChain(cli, eligibleVotersChainId);
+    const { eligibleVotersRegitrations } = await parseEligibleVotersChain(cli, publicKeysResolver, eligibleVotersChainId);
 
     if (definition.identity !== eligibleVotersRegitrations[0].identity) {
         throw new Error(`Mismatch of identities between vote chain ${chainId} and eligible voters chain ${eligibleVotersChainId}`);
@@ -26,14 +26,14 @@ async function parseVote(cli, chainId) {
     };
 }
 
-async function parseVoteChain(cli, chainId) {
+async function parseVoteChain(cli, publicKeysResolver, chainId) {
 
     let definition, firstEntryContainsVoteDefinition = false;
     const commits = [], reveals = [], parseErrors = [];
     await cli.rewindChainWhile(chainId, () => true, async function (entry) {
         firstEntryContainsVoteDefinition = false;
         try {
-            const parsed = await parseVoteChainEntry(cli, entry);
+            const parsed = await parseVoteChainEntry(publicKeysResolver, entry);
             switch (parsed.type) {
                 case 'definition':
                     definition = parsed;
@@ -63,10 +63,10 @@ async function parseVoteChain(cli, chainId) {
     };
 }
 
-async function parseEligibleVotersChain(cli, chainId) {
+async function parseEligibleVotersChain(cli, publicKeysResolver, chainId) {
     const entries = await cli.getAllEntriesOfChain(chainId);
 
-    const initialEligibleVoters = await parseInitialEligibleVotersEntry(cli, entries[0]);
+    const initialEligibleVoters = await parseInitialEligibleVotersEntry(publicKeysResolver, entries[0]);
 
     // Iterate over the append entries
     const appends = [], parseErrors = [], entryHashes = new Set();
@@ -76,7 +76,7 @@ async function parseEligibleVotersChain(cli, chainId) {
                 // Skip entry replayed
                 parseErrors.push({ entryHash: entry.hashHex(), error: 'Replayed entry' });
             } else {
-                appends.push(await parseAppendEligibleVotersEntry(cli, entry, initialEligibleVoters.identity, initialEligibleVoters.publicKey));
+                appends.push(await parseAppendEligibleVotersEntry(publicKeysResolver, entry, initialEligibleVoters.identity, initialEligibleVoters.publicKey));
                 entryHashes.add(entry.hashHex());
             }
         } catch (e) {
@@ -88,7 +88,7 @@ async function parseEligibleVotersChain(cli, chainId) {
 }
 
 
-async function parseInitialEligibleVotersEntry(cli, entry) {
+async function parseInitialEligibleVotersEntry(publicKeysResolver, entry) {
     if (entry.extIds.length !== 5) {
         throw new Error(`Invalid number of external ids for initial eligible voters entry ${entry.hashHex()}.`);
     }
@@ -97,7 +97,7 @@ async function parseInitialEligibleVotersEntry(cli, entry) {
         throw new Error(`Invalid header for initial eligible voters entry ${entry.hashHex()}`);
     }
 
-    await verifyIdentityKeyAssociation(cli, entry.extIds[1].toString('hex'), keyToPublicIdentityKey(entry.extIds[3]), entry.blockContext.directoryBlockHeight);
+    await verifyIdentityKeyAssociation(publicKeysResolver, entry.extIds[1].toString('hex'), keyToPublicIdentityKey(entry.extIds[3]), entry.blockContext.directoryBlockHeight);
 
     const signedData = sha512(Buffer.concat([entry.extIds[2], entry.content]));
     if (!sign.detached.verify(signedData, entry.extIds[4], entry.extIds[3])) {
@@ -118,7 +118,7 @@ async function parseInitialEligibleVotersEntry(cli, entry) {
     };
 }
 
-async function parseAppendEligibleVotersEntry(cli, entry, initiatorIdentity, publicKey) {
+async function parseAppendEligibleVotersEntry(publicKeysResolver, entry, initiatorIdentity, publicKey) {
     if (entry.extIds.length !== 3) {
         throw new Error(`Invalid number of external ids for append eligible voters entry ${entry.hashHex()}.`);
     }
@@ -127,7 +127,7 @@ async function parseAppendEligibleVotersEntry(cli, entry, initiatorIdentity, pub
         throw new Error(`Invalid header for initial eligible voters entry ${entry.hashHex()}`);
     }
 
-    await verifyIdentityKeyAssociation(cli, initiatorIdentity, keyToPublicIdentityKey(publicKey), entry.blockContext.directoryBlockHeight);
+    await verifyIdentityKeyAssociation(publicKeysResolver, initiatorIdentity, keyToPublicIdentityKey(publicKey), entry.blockContext.directoryBlockHeight);
 
     const signedData = sha512(Buffer.concat([entry.chainId, entry.extIds[1], entry.content]));
     if (!sign.detached.verify(signedData, entry.extIds[2], Buffer.from(publicKey, 'hex'))) {
@@ -146,16 +146,16 @@ async function parseAppendEligibleVotersEntry(cli, entry, initiatorIdentity, pub
     };
 }
 
-function parseVoteChainEntry(cli, entry) {
+function parseVoteChainEntry(publicKeysResolver, entry) {
     if (entry.extIds.length === 0) {
         throw new Error(`Entry [${entry.hashHex()}] is not a valid factom vote chain entry.`);
     }
 
     switch (entry.extIds[0].toString()) {
         case 'factom-vote':
-            return parseVoteDefinitionEntry(cli, entry);
+            return parseVoteDefinitionEntry(publicKeysResolver, entry);
         case 'factom-vote-commit':
-            return parseVoteCommitEntry(cli, entry);
+            return parseVoteCommitEntry(publicKeysResolver, entry);
         case 'factom-vote-reveal':
             return parseVoteRevealEntry(entry);
         default:
@@ -163,7 +163,7 @@ function parseVoteChainEntry(cli, entry) {
     }
 }
 
-async function parseVoteDefinitionEntry(cli, entry) {
+async function parseVoteDefinitionEntry(publicKeysResolver, entry) {
     if (entry.extIds.length !== 5) {
         throw new Error(`Invalid number of external ids for vote definition entry ${entry.hashHex()}.`);
     }
@@ -171,7 +171,7 @@ async function parseVoteDefinitionEntry(cli, entry) {
         throw new Error(`Invalid header for vote definition entry ${entry.hashHex()}.`);
     }
 
-    await verifyIdentityKeyAssociation(cli, entry.extIds[2].toString('hex'), keyToPublicIdentityKey(entry.extIds[3]), entry.blockContext.directoryBlockHeight);
+    await verifyIdentityKeyAssociation(publicKeysResolver, entry.extIds[2].toString('hex'), keyToPublicIdentityKey(entry.extIds[3]), entry.blockContext.directoryBlockHeight);
 
     const signedData = sha512(entry.content);
     if (!sign.detached.verify(signedData, entry.extIds[4], entry.extIds[3])) {
@@ -191,7 +191,7 @@ async function parseVoteDefinitionEntry(cli, entry) {
     };
 }
 
-async function parseVoteCommitEntry(cli, entry) {
+async function parseVoteCommitEntry(publicKeysResolver, entry) {
     if (entry.extIds.length !== 4) {
         throw new Error(`Invalid number of external ids for vote commit entry ${entry.hashHex()}.`);
     }
@@ -199,7 +199,7 @@ async function parseVoteCommitEntry(cli, entry) {
         throw new Error(`Invalid header for vote commit entry ${entry.hashHex()}`);
     }
 
-    await verifyIdentityKeyAssociation(cli, entry.extIds[1].toString('hex'), keyToPublicIdentityKey(entry.extIds[2]), entry.blockContext.directoryBlockHeight);
+    await verifyIdentityKeyAssociation(publicKeysResolver, entry.extIds[1].toString('hex'), keyToPublicIdentityKey(entry.extIds[2]), entry.blockContext.directoryBlockHeight);
 
     const signedData = sha512(Buffer.concat([entry.chainId, entry.content]));
     if (!sign.detached.verify(signedData, entry.extIds[3], entry.extIds[2])) {

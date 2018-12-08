@@ -5,10 +5,10 @@ const ID_PUB_PREFIX = Buffer.from('0345ef9de0', 'hex'),
     ID_SEC_PREFIX = Buffer.from('0345f3d0d6', 'hex');
 const VALID_ID_PREFIXES = new Set(['idpub', 'idsec']);
 
-async function getVoteIdentity(cli, identity) {
-    await verifyIdentityKeyAssociation(cli, identity.chainId, identity.key);
+async function getVoteIdentity(identityResolvers, identity) {
+    await verifyIdentityKeyAssociation(identityResolvers.publicKeysResolver, identity.chainId, identity.key);
 
-    const secretKey = extractKey(await getSecretIdentityKey(cli, identity.key));
+    const secretKey = extractKey(await getSecretIdentityKey(identityResolvers.privateKeyResolver, identity.key));
 
     return {
         id: identity.chainId,
@@ -16,18 +16,10 @@ async function getVoteIdentity(cli, identity) {
     };
 }
 
-async function verifyIdentityKeyAssociation(cli, identityChainId, identityKey, blockHeight) {
+async function verifyIdentityKeyAssociation(identityPublicKeysResolver, identityChainId, identityKey, blockHeight) {
     const publicIdentityKey = getPublicIdentityKey(identityKey);
 
-    if (typeof blockHeight !== 'number') {
-        const heights = await cli.getHeights();
-        blockHeight = heights.leaderHeight - 1;
-    }
-
-    const { keys } = await cli.walletdApi('identity-keys-at-height', {
-        chainid: identityChainId,
-        height: blockHeight
-    });
+    const keys = await identityPublicKeysResolver.call(null, identityChainId, blockHeight);
 
     if (!keys.includes(publicIdentityKey)) {
         throw new Error(`Public identity key [${publicIdentityKey}] is not associated with identity [${identityChainId}] at block height ${blockHeight}.`);
@@ -52,11 +44,11 @@ function getPublicIdentityKey(key) {
     }
 }
 
-function getSecretIdentityKey(cli, key) {
+function getSecretIdentityKey(privateKeyResolver, key) {
     if (isValidSecretIdentityKey(key)) {
         return key;
     } else if (isValidPublicIdentityKey(key)) {
-        return cli.walletdApi('identity-key', { public: key }).then(data => data.secret);
+        return privateKeyResolver.call(null, key);
     } else {
         throw new Error(`Invalid identity key: ${key}`);
     }
@@ -111,6 +103,28 @@ function keyToSecretIdentityKey(key) {
     return keyToIdentityKey(key, ID_SEC_PREFIX);
 }
 
+///////////////////////////////
+// Walletd identity resolvers
+///////////////////////////////
+
+async function walletdIdentityPublicKeysResolver(cli, identityChainId, blockHeight) {
+    if (typeof blockHeight !== 'number') {
+        const heights = await cli.getHeights();
+        blockHeight = heights.leaderHeight - 1;
+    }
+
+    const { keys } = await cli.walletdApi('identity-keys-at-height', {
+        chainid: identityChainId,
+        height: blockHeight
+    });
+
+    return keys;
+}
+
+async function walletdIdentityPrivateKeyResolver(cli, key) {
+    return cli.walletdApi('identity-key', { public: key }).then(data => data.secret);
+}
+
 module.exports = {
     extractKey,
     getVoteIdentity,
@@ -121,5 +135,7 @@ module.exports = {
     isValidSecretIdentityKey,
     keyToPublicIdentityKey,
     keyToSecretIdentityKey,
-    verifyIdentityKeyAssociation
+    verifyIdentityKeyAssociation,
+    walletdIdentityPublicKeysResolver,
+    walletdIdentityPrivateKeyResolver
 };

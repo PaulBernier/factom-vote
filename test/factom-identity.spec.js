@@ -1,7 +1,9 @@
 const assert = require('chai').assert,
     { FactomCli } = require('factom'),
     sinon = require('sinon'),
-    { getVoteIdentity,
+    { walletdIdentityPublicKeysResolver,
+        walletdIdentityPrivateKeyResolver,
+        getVoteIdentity,
         getPublicIdentityKey,
         getSecretIdentityKey,
         isValidIdentityKey,
@@ -47,9 +49,10 @@ describe('Factom digital identities', function () {
             .withArgs('identity-key', { public: 'idpub2eubg6p18fefnHPW2Z42Wyre8LwqmRbHpkaEfEmJ213cUo8u7w' })
             .returns(Promise.resolve({ secret: 'idsec2Vn3VT8FdE1YpcDms8zSvXR4DGzQeMMdeLRP2RbMCSWCFoQDbS' }));
 
-        assert.equal(await getSecretIdentityKey(cli, 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz'), 'idsec1wnZ9FLheMDXZNnnDHXdqZcMiDrgg2hTNzdseNLwFnEot362c4');
-        assert.equal(await getSecretIdentityKey(cli, 'idpub2eubg6p18fefnHPW2Z42Wyre8LwqmRbHpkaEfEmJ213cUo8u7w'), 'idsec2Vn3VT8FdE1YpcDms8zSvXR4DGzQeMMdeLRP2RbMCSWCFoQDbS');
-        assert.equal(await getSecretIdentityKey(cli, 'idsec1wnZ9FLheMDXZNnnDHXdqZcMiDrgg2hTNzdseNLwFnEot362c4'), 'idsec1wnZ9FLheMDXZNnnDHXdqZcMiDrgg2hTNzdseNLwFnEot362c4');
+        const privateKeyResolver = walletdIdentityPrivateKeyResolver.bind(null, cli);
+        assert.equal(await getSecretIdentityKey(privateKeyResolver, 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz'), 'idsec1wnZ9FLheMDXZNnnDHXdqZcMiDrgg2hTNzdseNLwFnEot362c4');
+        assert.equal(await getSecretIdentityKey(privateKeyResolver, 'idpub2eubg6p18fefnHPW2Z42Wyre8LwqmRbHpkaEfEmJ213cUo8u7w'), 'idsec2Vn3VT8FdE1YpcDms8zSvXR4DGzQeMMdeLRP2RbMCSWCFoQDbS');
+        assert.equal(await getSecretIdentityKey(privateKeyResolver, 'idsec1wnZ9FLheMDXZNnnDHXdqZcMiDrgg2hTNzdseNLwFnEot362c4'), 'idsec1wnZ9FLheMDXZNnnDHXdqZcMiDrgg2hTNzdseNLwFnEot362c4');
 
         mock.verify();
     });
@@ -73,7 +76,12 @@ describe('Factom digital identities', function () {
             .withArgs('identity-keys-at-height', { chainid: CHAIN_ID, height: 1988 })
             .returns(Promise.resolve({ keys: [PUB_KEY] }));
 
-        const voteIdentity = await getVoteIdentity(cli, { chainId: CHAIN_ID, key: PUB_KEY });
+        const resolvers = {
+            publicKeysResolver: walletdIdentityPublicKeysResolver.bind(null, cli),
+            privateKeyResolver: walletdIdentityPrivateKeyResolver.bind(null, cli)
+        };
+
+        const voteIdentity = await getVoteIdentity(resolvers, { chainId: CHAIN_ID, key: PUB_KEY });
 
         mock.verify();
         assert.equal(voteIdentity.id, CHAIN_ID);
@@ -88,7 +96,9 @@ describe('Factom digital identities', function () {
             .returns(Promise.resolve({ leaderHeight: 1989 }));
         expectIdentityKeysAtHeightCall(mock, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 1988, 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz');
 
-        await verifyIdentityKeyAssociation(cli, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz');
+        const publicKeysResolver = walletdIdentityPublicKeysResolver.bind(null, cli);
+
+        await verifyIdentityKeyAssociation(publicKeysResolver, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz');
 
         mock.verify();
     });
@@ -99,7 +109,9 @@ describe('Factom digital identities', function () {
         mock.expects('getHeights').never();
         expectIdentityKeysAtHeightCall(mock, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 7, 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz');
 
-        await verifyIdentityKeyAssociation(cli, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz', 7);
+        const publicKeysResolver = walletdIdentityPublicKeysResolver.bind(null, cli);
+
+        await verifyIdentityKeyAssociation(publicKeysResolver, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz', 7);
 
         mock.verify();
     });
@@ -108,10 +120,11 @@ describe('Factom digital identities', function () {
         const cli = new FactomCli();
         const mock = sinon.mock(cli);
         expectIdentityKeysAtHeightCall(mock, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 7, 'idpub3bjJcyp2CgzamFdCdpM7JBLuWoBz7kdk7iHKwDXb3i7qaap848');
+        const publicKeysResolver = walletdIdentityPublicKeysResolver.bind(null, cli);
 
         try {
-            await verifyIdentityKeyAssociation(cli, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz', 7);
-        } catch(e) {
+            await verifyIdentityKeyAssociation(publicKeysResolver, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz', 7);
+        } catch (e) {
             assert.instanceOf(e, Error);
             mock.verify();
             return;

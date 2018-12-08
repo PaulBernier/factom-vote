@@ -3,7 +3,7 @@ const assert = require('chai').assert,
     crypto = require('crypto'),
     { FactomCli, Entry } = require('factom'),
     { getVote } = require('../src/read-vote/read-vote'),
-    { keyToSecretIdentityKey, getPublicIdentityKey } = require('../src/factom-identity'),
+    { keyToSecretIdentityKey, getPublicIdentityKey, walletdIdentityPublicKeysResolver } = require('../src/factom-identity'),
     { generateVoteChain, generateEligibleVotersChain } = require('../src/write-vote/create-vote-struct'),
     { generateVoteCommitEntry, generateVoteRevealEntry } = require('../src/write-vote/participate-vote-struct');
 
@@ -76,8 +76,9 @@ describe('Read vote', function () {
         expectIdentityKeysAtHeightCall(mock, initiator, 1, initiatorPublicIdentityKey, 2);
         expectIdentityKeysAtHeightCall(mock, voter1, 1111, voter1PublicIdentityKey);
         expectIdentityKeysAtHeightCall(mock, voter2, 1119, voter2PublicIdentityKey);
+        const publicKeysResolver = walletdIdentityPublicKeysResolver.bind(null, cli);
 
-        const { vote, result } = await getVote(cli, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
+        const { vote, result } = await getVote(cli, publicKeysResolver, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
         mock.verify();
 
         assert.isObject(vote);

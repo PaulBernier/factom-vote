@@ -2,8 +2,8 @@ const { processParsedVote } = require('./process-vote'),
     { parseVote, parseVoteChainEntry } = require('./parse-vote'),
     { computeResult } = require('./compute-vote-result');
 
-async function getVote(cli, chainId) {
-    const parsedVote = await parseVote(cli, chainId);
+async function getVote(cli, publicKeysResolver, chainId) {
+    const parsedVote = await parseVote(cli, publicKeysResolver, chainId);
     const vote = processParsedVote(parsedVote);
     const result = computeResult(vote);
 
@@ -12,9 +12,9 @@ async function getVote(cli, chainId) {
     };
 }
 
-async function getVoteDefinition(cli, chainId) {
+async function getVoteDefinition(cli, publicKeysResolver, chainId) {
     const firstEntry = await cli.getFirstEntry(chainId);
-    const parsed = await parseVoteChainEntry(cli, firstEntry);
+    const parsed = await parseVoteChainEntry(publicKeysResolver, firstEntry);
 
     if (parsed.type === 'definition') {
         return parsed;

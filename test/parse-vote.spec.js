@@ -2,7 +2,7 @@ const assert = require('chai').assert,
     sinon = require('sinon'),
     crypto = require('crypto'),
     { FactomCli, Entry } = require('factom'),
-    { keyToSecretIdentityKey, getPublicIdentityKey } = require('../src/factom-identity'),
+    { keyToSecretIdentityKey, getPublicIdentityKey, walletdIdentityPublicKeysResolver } = require('../src/factom-identity'),
     { parseVote, parseVoteChain, parseVoteChainEntry, parseEligibleVotersChain } = require('../src/read-vote/parse-vote'),
     { generateVoteChain, generateEligibleVotersChain, generateAppendEligibleVotersEntry } = require('../src/write-vote/create-vote-struct'),
     { generateVoteCommitEntry, generateVoteRevealEntry } = require('../src/write-vote/participate-vote-struct');
@@ -37,8 +37,9 @@ describe('Parse vote', function () {
         mock.expects('getHeights').never();
         expectIdentityKeysAtHeightCall(mock, initiator, 1, initiatorPublicIdentityKey);
         expectIdentityKeysAtHeightCall(mock, initiator, 2, initiatorPublicIdentityKey);
+        const publicKeysResolver = walletdIdentityPublicKeysResolver.bind(null, cli);
 
-        const { eligibleVotersRegitrations, parseErrors } = await parseEligibleVotersChain(cli, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
+        const { eligibleVotersRegitrations, parseErrors } = await parseEligibleVotersChain(cli, publicKeysResolver, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
 
         mock.verify();
         assert.lengthOf(eligibleVotersRegitrations, 2);
@@ -81,8 +82,9 @@ describe('Parse vote', function () {
         mock.expects('getHeights').never();
         expectIdentityKeysAtHeightCall(mock, initiator, 1, initiatorPublicIdentityKey);
         expectIdentityKeysAtHeightCall(mock, initiator, 2, initiatorPublicIdentityKey);
+        const publicKeysResolver = walletdIdentityPublicKeysResolver.bind(null, cli);
 
-        const { eligibleVotersRegitrations, parseErrors } = await parseEligibleVotersChain(cli, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
+        const { eligibleVotersRegitrations, parseErrors } = await parseEligibleVotersChain(cli, publicKeysResolver, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
 
         mock.verify();
         assert.lengthOf(eligibleVotersRegitrations, 2);
@@ -104,9 +106,9 @@ describe('Parse vote', function () {
         const mock = sinon.mock(cli);
         mock.expects('getHeights').never();
         expectIdentityKeysAtHeightCall(mock, initiator, 11, initiatorPublicIdentityKey);
+        const publicKeysResolver = walletdIdentityPublicKeysResolver.bind(null, cli);
 
-
-        const parsed = await parseVoteChainEntry(cli, entry);
+        const parsed = await parseVoteChainEntry(publicKeysResolver, entry);
 
         mock.verify();
         assert.equal(parsed.type, 'definition');
@@ -129,8 +131,9 @@ describe('Parse vote', function () {
         const mock = sinon.mock(cli);
         mock.expects('getHeights').never();
         expectIdentityKeysAtHeightCall(mock, voter, 2, voterPublicIdentityKey);
+        const publicKeysResolver = walletdIdentityPublicKeysResolver.bind(null, cli);
 
-        const parsed = await parseVoteChainEntry(cli, entry);
+        const parsed = await parseVoteChainEntry(publicKeysResolver, entry);
 
         assert.equal(parsed.type, 'commit');
         assert.equal(parsed.identity, voter.id.toString('hex'));
@@ -193,11 +196,12 @@ describe('Parse vote', function () {
         mock.expects('getHeights').never();
         expectIdentityKeysAtHeightCall(mock, voter, 2, voterPublicIdentityKey);
         expectIdentityKeysAtHeightCall(mock, initiator, 1, initiatorPublicIdentityKey);
+        const publicKeysResolver = walletdIdentityPublicKeysResolver.bind(null, cli);
 
         const { definition,
             commits,
             reveals,
-            parseErrors } = await parseVoteChain(cli, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
+            parseErrors } = await parseVoteChain(cli, publicKeysResolver, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
         mock.verify();
 
         // Definition
@@ -269,8 +273,9 @@ describe('Parse vote', function () {
         mock.expects('getHeights').never();
         expectIdentityKeysAtHeightCall(mock, voter, 2, voterPublicIdentityKey);
         expectIdentityKeysAtHeightCall(mock, initiator, 1, initiatorPublicIdentityKey, 2);
+        const publicKeysResolver = walletdIdentityPublicKeysResolver.bind(null, cli);
 
-        const { definition, commits, reveals, eligibleVotersRegitrations } = await parseVote(cli, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
+        const { definition, commits, reveals, eligibleVotersRegitrations } = await parseVote(cli, publicKeysResolver, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679');
 
         mock.verify();
         assert.deepEqual(definition.data, voteDef);

@@ -1,7 +1,8 @@
 const { FactomCli, Entry } = require('factom'),
     sinon = require('sinon'),
     crypto = require('crypto'),
-    { keyToSecretIdentityKey, getPublicIdentityKey } = require('../src/factom-identity'),
+    { keyToSecretIdentityKey, getPublicIdentityKey,
+        walletdIdentityPublicKeysResolver, walletdIdentityPrivateKeyResolver } = require('../src/factom-identity'),
     participateVote = require('../src/write-vote/participate-vote'),
     { generateVoteChain } = require('../src/write-vote/create-vote-struct');
 
@@ -54,8 +55,12 @@ describe('Participate vote', function () {
             .returns(Promise.resolve({ keys: ['idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz'] }));
         mock.expects('add')
             .once();
+        const resolvers = {
+            publicKeysResolver: walletdIdentityPublicKeysResolver.bind(null, cli),
+            privateKeyResolver: walletdIdentityPrivateKeyResolver.bind(null, cli)
+        };
 
-        await participateVote.commitVote(cli, voteChainId, vote, voter, process.env.EC_PRIVATE_KEY);
+        await participateVote.commitVote(cli, resolvers, voteChainId, vote, voter, process.env.EC_PRIVATE_KEY);
 
         mock.verify();
     });
@@ -100,8 +105,9 @@ describe('Participate vote', function () {
 
         mock.expects('add')
             .once();
+        const publicKeysResolver = walletdIdentityPublicKeysResolver.bind(null, cli);
 
-        await participateVote.revealVote(cli, voteChainId, vote, voterId, process.env.EC_PRIVATE_KEY);
+        await participateVote.revealVote(cli, publicKeysResolver, voteChainId, vote, voterId, process.env.EC_PRIVATE_KEY);
 
         mock.verify();
     });

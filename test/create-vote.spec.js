@@ -1,6 +1,7 @@
 const { FactomCli } = require('factom'),
     assert = require('chai').assert,
-    createVote = require('../src/write-vote/create-vote');
+    createVote = require('../src/write-vote/create-vote'),
+    { walletdIdentityPublicKeysResolver, walletdIdentityPrivateKeyResolver } = require('../src/factom-identity');
 
 require('dotenv').config();
 
@@ -19,14 +20,19 @@ describe('Create vote', function () {
             definition, registrationChainId, eligibleVoters, identity
         };
 
-        const result = await createVote.createVote(cli, voteData, process.env.EC_PRIVATE_KEY);
+        const resolvers = {
+            publicKeysResolver: walletdIdentityPublicKeysResolver.bind(null, cli),
+            privateKeyResolver: walletdIdentityPrivateKeyResolver.bind(null, cli)
+        };
+
+        const result = await createVote.createVote(cli, resolvers, voteData, process.env.EC_PRIVATE_KEY);
         assert.isObject(result);
         assert.isObject(result.eligibleVoters);
         assert.isObject(result.vote);
         assert.isObject(result.registration);
     });
 
-    async function getVoteDefinition() { 
+    async function getVoteDefinition() {
         const definition = JSON.parse(JSON.stringify(require('./data/vote-definition')));
         delete definition.vote.eligibleVotersChainId;
         const currentHeight = await cli.getHeights().then(h => h.leaderHeight);
