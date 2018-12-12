@@ -1,0 +1,44 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Factom on-chain vote data schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "definition",
+        "registrationChainId",
+        "identity"
+    ],
+    "properties": {
+        "definition": {
+            "type": "object"
+        },
+        "eligibleVoters": {
+            "type": "array"
+        },
+        "registrationChainId": {
+            "type": "string",
+            "minLength": 64,
+            "maxLength": 64
+        },
+        "identity": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "chainId",
+                "key"
+            ],
+            "properties": {
+                "chainId": {
+                    "type": "string",
+                    "minLength": 64,
+                    "maxLength": 64
+                },
+                "key": {
+                    "type": "string",
+                    "minLength": 55,
+                    "maxLength": 55
+                }
+            }
+        }
+    }
+}

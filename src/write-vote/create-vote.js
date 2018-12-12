@@ -1,4 +1,5 @@
 const { getPublicAddress } = require('factom'),
+    { validateCreateVoteData } = require('../validation/json-validation'),
     { generateEligibleVotersChain,
         generateVoteChain,
         generateVoteRegistrationEntry,
@@ -6,6 +7,9 @@ const { getPublicAddress } = require('factom'),
     { getVoteIdentity, extractKey, getPublicIdentityKey, getSecretIdentityKey } = require('../factom-identity');
 
 async function createVote(cli, identityResolvers, voteData, ecAddress, skipValidation) {
+    if (!validateCreateVoteData(voteData)) {
+        throw new Error('Create vote data validation error:\n' + JSON.stringify(validateCreateVoteData.errors));
+    }
     const { definition, registrationChainId, eligibleVoters, identity } = voteData;
 
     if (!await cli.chainExists(registrationChainId)) {
