@@ -34,7 +34,7 @@ function generateEligibleVotersChain(eligibleVoters, initiator) {
     }
 
     const keyPair = getKeyPair(initiator.secretKey);
-    const nonce = nacl.randomBytes(NONCE_SIZE);
+    const nonce = Buffer.from(nacl.randomBytes(NONCE_SIZE));
 
     const content = Buffer.from(JSON.stringify(eligibleVoters), 'utf8');
     const dataToSign = sha512(Buffer.concat([nonce, content]));
