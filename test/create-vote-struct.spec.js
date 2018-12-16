@@ -117,4 +117,32 @@ describe('Create vote structures', function () {
         assert.match(composed.reveal, /^[0-9a-f]+$/);
     });
 
+    it('should compute vote creation cost', async function () {
+
+        const registrationChainId = 'a968e880ee3a7002f25ade15ae36a77c15f4dbc9d8c11fdd5fe86ba6af73a475';
+        const definition = require('./data/vote-definition');
+        const identity = { chainId: '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', key: 'idsec2Vn3VT8FdE1YpcDms8zSvXR4DGzQeMMdeLRP2RbMCSWCFoQDbS' };
+        const voteData = {
+            definition, registrationChainId, identity
+        };
+
+        const result = await createVote.computeVoteCreationCost(voteData);
+        assert.equal(result, 12);
+    });
+
+    it('should compute vote creation cost with new eligible voters chain', async function () {
+
+        const registrationChainId = 'a968e880ee3a7002f25ade15ae36a77c15f4dbc9d8c11fdd5fe86ba6af73a475';
+        const definition = JSON.parse(JSON.stringify(require('./data/vote-definition')));
+        delete definition.vote.eligibleVotersChainId;
+        const eligibleVoters = require('./data/eligible-voters');
+        const identity = { chainId: '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', key: 'idsec2Vn3VT8FdE1YpcDms8zSvXR4DGzQeMMdeLRP2RbMCSWCFoQDbS' };
+        const voteData = {
+            definition, registrationChainId, eligibleVoters, identity
+        };
+
+        const result = await createVote.computeVoteCreationCost(voteData);
+        assert.equal(result, 23);
+    });
+
 });

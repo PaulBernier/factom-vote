@@ -1,5 +1,5 @@
 const { Chain, composeChain } = require('factom/src/chain'),
-    { validateVoteDefinition, validateEligibleVoters } = require('../validation/json-validation'),
+    { validateVoteDefinition, validateEligibleVoters, validateCreateVoteData } = require('../validation/json-validation'),
     { Entry, composeEntry } = require('factom/src/entry'),
     nacl = require('tweetnacl/nacl-fast'),
     sign = nacl.sign,
@@ -81,6 +81,30 @@ function generateVoteRegistrationEntry(registrationChainId, voteChainId) {
         .build();
 }
 
+async function computeVoteCreationCost(voteData) {
+    if (!validateCreateVoteData(voteData)) {
+        throw new Error('Create vote data validation error:\n' + JSON.stringify(validateCreateVoteData.errors));
+    }
+    const { definition, registrationChainId, eligibleVoters, identity } = voteData;
+
+    // Dummy secretKey for the cost computation
+    const initiator = { id: identity.chainId, secretKey: '58b49c372d807b05d80ad2fc43e468bf5bd5012305b6261036a74778f049f240' };
+    const defCopy = JSON.parse(JSON.stringify(definition));
+    const chainsToCreate = [];
+
+    if (!defCopy.vote.eligibleVotersChainId) {
+        const eligibleVotersChain = generateEligibleVotersChain(eligibleVoters || [], initiator);
+        defCopy.vote.eligibleVotersChainId = eligibleVotersChain.idHex;
+        chainsToCreate.push(eligibleVotersChain);
+    }
+
+    const voteChain = generateVoteChain(defCopy, initiator);
+    chainsToCreate.push(voteChain);
+    const registrationEntry = generateVoteRegistrationEntry(registrationChainId, voteChain.id);
+    
+    return registrationEntry.ecCost() + chainsToCreate.map(c => c.ecCost()).reduce((acc, cur) => acc + cur, 0);
+}
+
 ////////////////////////////
 
 function composeVoteChain(vote, initiator, ecPrivateAddress) {
@@ -114,5 +138,6 @@ module.exports = {
     composeVoteRegistrationEntry,
     composeVoteChain,
     composeEligibleVotersChain,
-    composeAppendEligibleVotersEntry
+    composeAppendEligibleVotersEntry,
+    computeVoteCreationCost
 };

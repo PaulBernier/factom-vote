@@ -1,6 +1,6 @@
 {
     "name": "factom-vote",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "description": "JS implementation of the Factom voting specification",
     "main": "src/factom-vote.js",
     "scripts": {
