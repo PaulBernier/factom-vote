@@ -67,7 +67,6 @@
             "required": [
                 "commitStart",
                 "commitEnd",
-                "revealStart",
                 "revealEnd"
             ],
             "additionalProperties": false,
@@ -82,16 +81,10 @@
                         "$data": "1/commitStart"
                     }
                 },
-                "revealStart": {
+                "revealEnd": {
                     "type": "integer",
                     "exclusiveMinimum": {
                         "$data": "1/commitEnd"
-                    }
-                },
-                "revealEnd": {
-                    "type": "integer",
-                    "minimum": {
-                        "$data": "1/revealStart"
                     }
                 }
             }

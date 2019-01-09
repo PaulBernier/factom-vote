@@ -288,7 +288,7 @@ describe('Parse vote', function () {
     function expectIdentityKeysAtHeightCall(mock, identity, height, key, exactly) {
         mock.expects('walletdApi')
             .exactly(exactly || 1)
-            .withArgs('identity-keys-at-height', {
+            .withArgs('active-identity-keys', {
                 chainid: identity.id.toString('hex'),
                 height: height
             })

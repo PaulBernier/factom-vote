@@ -19,7 +19,7 @@ describe('Process parsed vote', function () {
             maxOptions: 1,
             allowAbstention: true
         };
-        const definition = buildDefinition(5, 10, 11, 20, config);
+        const definition = buildDefinition(5, 10, 20, config);
         const eligibleVotersRegitrations = [{
             data: [{ voterId: 'ID_1', weight: 4 }, { voterId: 'ID_2', weight: 999999 }, { voterId: 'ID_3' }],
             blockContext: {
@@ -65,13 +65,13 @@ describe('Process parsed vote', function () {
         assert.deepEqual(vote.validVotes, { ID_1: ['OPT_1'] });
     });
 
-    function buildDefinition(commitStart, commitEnd, revealStart, revealEnd, config) {
+    function buildDefinition(commitStart, commitEnd, revealEnd, config) {
         return {
             data: {
                 vote: {
                     type: 0,
                     phasesBlockHeights: {
-                        commitStart, commitEnd, revealStart, revealEnd
+                        commitStart, commitEnd, revealEnd
                     },
                     config
                 }

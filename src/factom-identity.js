@@ -108,12 +108,7 @@ function keyToSecretIdentityKey(key) {
 ///////////////////////////////
 
 async function walletdIdentityPublicKeysResolver(cli, identityChainId, blockHeight) {
-    if (typeof blockHeight !== 'number') {
-        const heights = await cli.getHeights();
-        blockHeight = heights.leaderHeight - 1;
-    }
-
-    const { keys } = await cli.walletdApi('identity-keys-at-height', {
+    const { keys } = await cli.walletdApi('active-identity-keys', {
         chainid: identityChainId,
         height: blockHeight
     });

@@ -33,7 +33,7 @@ describe('Participate vote', function () {
             .withArgs(voteChainId)
             .returns(Promise.resolve(firstEntry));
         mock.expects('getHeights')
-            .twice()
+            .once()
             .returns(Promise.resolve({ leaderHeight: 1050 }));
         mock.expects('getBalance')
             .once()
@@ -41,16 +41,16 @@ describe('Participate vote', function () {
             .returns(Promise.resolve(1));
         mock.expects('walletdApi')
             .once()
-            .withArgs('identity-keys-at-height', {
+            .withArgs('active-identity-keys', {
                 chainid: initiator.id.toString('hex'),
                 height: 700
             })
             .returns(Promise.resolve({ keys: [initiatorPublicIdentityKey] }));
         mock.expects('walletdApi')
             .once()
-            .withArgs('identity-keys-at-height', {
+            .withArgs('active-identity-keys', {
                 chainid: voter.chainId,
-                height: 1049
+                height: undefined
             })
             .returns(Promise.resolve({ keys: ['idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz'] }));
         mock.expects('add')
@@ -97,7 +97,7 @@ describe('Participate vote', function () {
             .returns(Promise.resolve(1));
         mock.expects('walletdApi')
             .once()
-            .withArgs('identity-keys-at-height', {
+            .withArgs('active-identity-keys', {
                 chainid: initiator.id.toString('hex'),
                 height: 700
             })

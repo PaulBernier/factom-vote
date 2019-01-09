@@ -68,12 +68,9 @@ describe('Factom digital identities', function () {
             .once()
             .withArgs('identity-key', { public: PUB_KEY })
             .returns(Promise.resolve({ secret: SEC_KEY }));
-        mock.expects('getHeights')
-            .once()
-            .returns(Promise.resolve({ leaderHeight: 1989 }));
         mock.expects('walletdApi')
             .once()
-            .withArgs('identity-keys-at-height', { chainid: CHAIN_ID, height: 1988 })
+            .withArgs('active-identity-keys', { chainid: CHAIN_ID, height: undefined })
             .returns(Promise.resolve({ keys: [PUB_KEY] }));
 
         const resolvers = {
@@ -91,10 +88,8 @@ describe('Factom digital identities', function () {
     it('Should accept identity key association at current height', async function () {
         const cli = new FactomCli();
         const mock = sinon.mock(cli);
-        mock.expects('getHeights')
-            .once()
-            .returns(Promise.resolve({ leaderHeight: 1989 }));
-        expectIdentityKeysAtHeightCall(mock, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', 1988, 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz');
+
+        expectIdentityKeysAtHeightCall(mock, '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', undefined, 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz');
 
         const publicKeysResolver = walletdIdentityPublicKeysResolver.bind(null, cli);
 
@@ -136,7 +131,7 @@ describe('Factom digital identities', function () {
     function expectIdentityKeysAtHeightCall(mock, chainId, height, key, exactly) {
         mock.expects('walletdApi')
             .exactly(exactly || 1)
-            .withArgs('identity-keys-at-height', {
+            .withArgs('active-identity-keys', {
                 chainid: chainId,
                 height: height
             })

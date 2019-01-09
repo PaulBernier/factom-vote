@@ -4,11 +4,11 @@ function processParsedVote(parsedVote) {
     const { definition, eligibleVotersRegitrations, commits, reveals } = parsedVote;
 
     const voteDefinition = definition.data.vote;
-    const { commitStart, commitEnd, revealStart, revealEnd } = voteDefinition.phasesBlockHeights;
+    const { commitStart, commitEnd, revealEnd } = voteDefinition.phasesBlockHeights;
     const eligibleVoters = getEligibleVoters(eligibleVotersRegitrations, commitStart);
 
     const validCommits = getValidCommits(commits, commitStart, commitEnd, eligibleVoters);
-    const validReveals = getValidReveals(reveals, revealStart, revealEnd, eligibleVoters, voteDefinition.config);
+    const validReveals = getValidReveals(reveals, commitEnd, revealEnd, eligibleVoters, voteDefinition.config);
     const validVotes = getValidVotes(validCommits, validReveals);
 
     return { definition: voteDefinition, eligibleVoters, validVotes };
@@ -65,7 +65,7 @@ function getValidCommits(allCommits, commitStart, commitEnd, eligibleVoters) {
 // 3. Exclude all the reveals of an identity if one of its reveal was before
 // 4. Keep only the first valid reveal
 // 5. Validate that all the selected options are among the possible choices for the vote
-function getValidReveals(allReveals, revealStart, revealEnd, eligibleVoters, voteConfig) {
+function getValidReveals(allReveals, commitEnd, revealEnd, eligibleVoters, voteConfig) {
     allReveals.sort((a, b) => a.blockContext.directoryBlockHeight - b.blockContext.directoryBlockHeight);
     const reveals = {};
     const excludedVoters = new Set();
@@ -78,7 +78,7 @@ function getValidReveals(allReveals, revealStart, revealEnd, eligibleVoters, vot
         if (reveal.blockContext.directoryBlockHeight > revealEnd) {
             continue;
         }
-        if (reveal.blockContext.directoryBlockHeight < revealStart) {
+        if (reveal.blockContext.directoryBlockHeight < commitEnd + 1) {
             excludedVoters.add(identity);
             continue;
         }

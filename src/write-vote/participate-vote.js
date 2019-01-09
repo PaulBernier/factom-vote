@@ -35,8 +35,8 @@ function validateOptions(config, voterOptions) {
 async function revealVote(cli, publicKeysResolver, voteChainId, vote, voterId, ecAddress, skipValidation) {
     if (!skipValidation) {
         const definition = await getVoteDefinition(cli, publicKeysResolver, voteChainId);
-        const { revealStart, revealEnd } = definition.data.vote.phasesBlockHeights;
-        await validateBlockHeightInterval(cli, 'commit', revealStart, revealEnd);
+        const { commitEnd, revealEnd } = definition.data.vote.phasesBlockHeights;
+        await validateBlockHeightInterval(cli, 'reveal', commitEnd + 1, revealEnd);
     }
 
     const entry = generateVoteRevealEntry(voteChainId, vote, voterId);
@@ -49,7 +49,7 @@ async function validateFunds(cli, ecCost, ecAddress, message) {
     const balance = await cli.getBalance(ecAddress);
 
     if (ecCost > balance) {
-        throw new Error(`${message}. Not enough EC on ${getPublicAddress(ecAddress)}. Required: ${ecCost}EC. Available: ${balance}EC`);
+        throw new Error(`${message}. Not enough EC on ${getPublicAddress(ecAddress)}. Required: ${ecCost} EC. Available: ${balance} EC`);
     }
 }
 
@@ -57,7 +57,7 @@ async function validateBlockHeightInterval(cli, action, start, end) {
     const currentHeight = await cli.getHeights().then(h => h.leaderHeight + 1);
 
     if (currentHeight < start || currentHeight > end) {
-        throw new Error(`The height of the current block being built ${currentHeight} is not within the block height range of the vote ${action}:  [${start}, ${end}]`);
+        throw new Error(`The height of the current block being built (${currentHeight}) is not within the block height range of the vote ${action}:  [${start}, ${end}]`);
     }
 }
 

@@ -15,7 +15,7 @@ describe('Create vote', function () {
         const registrationChainId = 'a968e880ee3a7002f25ade15ae36a77c15f4dbc9d8c11fdd5fe86ba6af73a475';
         const definition = await getVoteDefinition();
         const eligibleVoters = require('./data/eligible-voters');
-        const identity = { chainId: '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635', key: 'idsec2Vn3VT8FdE1YpcDms8zSvXR4DGzQeMMdeLRP2RbMCSWCFoQDbS' };
+        const identity = { chainId: 'af76482ef7d428f181be3751a5f69e1d7d74e5ff8ff073ee527f6a5df82dfe9f', key: 'idsec1b4oatYvrCaaUwp8tNCBqFf7WgSfhYRofHeekeVCdDwUt5Mtxn' };
         const voteData = {
             definition, registrationChainId, eligibleVoters, identity
         };
@@ -40,7 +40,6 @@ describe('Create vote', function () {
         definition.vote.phasesBlockHeights = {
             commitStart: currentHeight + 10,
             commitEnd: currentHeight + 20,
-            revealStart: currentHeight + 30,
             revealEnd: currentHeight + 40
         };
 

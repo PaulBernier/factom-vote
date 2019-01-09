@@ -7,7 +7,6 @@
         "phasesBlockHeights": {
             "commitStart": 1000,
             "commitEnd": 2000,
-            "revealStart": 2001,
             "revealEnd": 3000
         },
         "eligibleVotersChainId": "a480ac008425c12c6cc0aae11c391ff0152c508a05996dfb2e1cdb1c17c73775",
