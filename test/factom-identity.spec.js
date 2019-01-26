@@ -1,6 +1,8 @@
 const assert = require('chai').assert,
     { FactomCli } = require('factom'),
     sinon = require('sinon'),
+    nacl = require('tweetnacl'),
+    { sign } = nacl,
     { walletdIdentityPublicKeysResolver,
         walletdIdentityPrivateKeyResolver,
         getVoteIdentity,
@@ -9,6 +11,7 @@ const assert = require('chai').assert,
         isValidIdentityKey,
         isValidPublicIdentityKey,
         verifyIdentityKeyAssociation,
+        getSignature,
         isValidSecretIdentityKey } = require('../src/factom-identity');
 
 describe('Factom digital identities', function () {
@@ -126,6 +129,22 @@ describe('Factom digital identities', function () {
         }
 
         throw new Error('Should have throw');
+    });
+
+    it('Should sign using private key', async function () {
+        const identity = sign.keyPair();
+        const message = nacl.randomBytes(32);
+        const sig = getSignature(identity, message);
+
+        assert.isTrue(sign.detached.verify(message, sig, identity.publicKey));
+    });
+
+    it('Should sign using custom signer', async function () {
+
+        const identity = { sign: () => 'custom' };
+        const sig = getSignature(identity, 'dummy');
+
+        assert.equal(sig, 'custom');
     });
 
     function expectIdentityKeysAtHeightCall(mock, chainId, height, key, exactly) {

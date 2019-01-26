@@ -11,16 +11,19 @@ describe('Parse vote', function () {
 
     it('Should parse eligible voters chain', async function () {
 
-        const initiator = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
+        const initiator = {
+            id: crypto.randomBytes(32), publicKey: '310df171d50ad46f0f5c115520b0fcde4522801de4732589df14b42d5f980818',
+            secretKey: 'd1011e7b33b3bb18c184730530a6b1977ce3ed3c3b66677a276bf326116a885b'
+        };
         const initiatorPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(initiator.secretKey));
         const initialVoters = [{ voterId: 'ID_1', weight: 22 }, { voterId: 'ID_2' }];
         const appendVoters = [{ voterId: 'ID_1', weight: 0 }, { voterId: 'ID_3' }];
 
-        const firstEntry = Entry.builder(generateEligibleVotersChain(initialVoters, initiator).firstEntry)
+        const firstEntry = Entry.builder((await generateEligibleVotersChain(initialVoters, initiator)).firstEntry)
             .blockContext({ directoryBlockHeight: 1 })
             .build();
 
-        const appendEntry = Entry.builder(generateAppendEligibleVotersEntry(appendVoters, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', initiator.secretKey))
+        const appendEntry = Entry.builder(await generateAppendEligibleVotersEntry(appendVoters, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', initiator))
             .blockContext({ directoryBlockHeight: 2 })
             .build();
         const invalidEntry = Entry.builder()
@@ -57,16 +60,18 @@ describe('Parse vote', function () {
 
     it('Should skip replayed entries', async function () {
 
-        const initiator = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
-        const initiatorPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(initiator.secretKey));
+        const initiator = {
+            id: crypto.randomBytes(32), publicKey: '310df171d50ad46f0f5c115520b0fcde4522801de4732589df14b42d5f980818',
+            secretKey: 'd1011e7b33b3bb18c184730530a6b1977ce3ed3c3b66677a276bf326116a885b'
+        }; const initiatorPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(initiator.secretKey));
         const initialVoters = [{ voterId: 'ID_1', weight: 22 }, { voterId: 'ID_2' }];
         const appendVoters = [{ voterId: 'ID_1', weight: 0 }, { voterId: 'ID_3' }];
 
-        const firstEntry = Entry.builder(generateEligibleVotersChain(initialVoters, initiator).firstEntry)
+        const firstEntry = Entry.builder((await generateEligibleVotersChain(initialVoters, initiator)).firstEntry)
             .blockContext({ directoryBlockHeight: 1 })
             .build();
 
-        const appendEntry = Entry.builder(generateAppendEligibleVotersEntry(appendVoters, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', initiator.secretKey))
+        const appendEntry = Entry.builder(await generateAppendEligibleVotersEntry(appendVoters, '7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', initiator))
             .blockContext({ directoryBlockHeight: 2 })
             .build();
         const duplicateEntry = Entry.builder(appendEntry)
@@ -95,10 +100,12 @@ describe('Parse vote', function () {
     });
 
     it('Should parse vote definition entry', async function () {
-        const initiator = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
-        const initiatorPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(initiator.secretKey));
+        const initiator = {
+            id: crypto.randomBytes(32), publicKey: '310df171d50ad46f0f5c115520b0fcde4522801de4732589df14b42d5f980818',
+            secretKey: 'd1011e7b33b3bb18c184730530a6b1977ce3ed3c3b66677a276bf326116a885b'
+        }; const initiatorPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(initiator.secretKey));
         const vote = require('./data/vote-definition');
-        const entry = Entry.builder(generateVoteChain(vote, initiator).firstEntry)
+        const entry = Entry.builder((await generateVoteChain(vote, initiator)).firstEntry)
             .blockContext({ directoryBlockHeight: 11 })
             .build();
 
@@ -120,10 +127,12 @@ describe('Parse vote', function () {
 
     it('Should parse vote commit entry', async function () {
 
-        const voter = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
-        const voterPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(voter.secretKey));
+        const voter = {
+            id: crypto.randomBytes(32), publicKey: '310df171d50ad46f0f5c115520b0fcde4522801de4732589df14b42d5f980818',
+            secretKey: 'd1011e7b33b3bb18c184730530a6b1977ce3ed3c3b66677a276bf326116a885b'
+        }; const voterPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(voter.secretKey));
         const vote = require('./data/vote.json');
-        const entry = Entry.builder(generateVoteCommitEntry('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', vote, voter))
+        const entry = Entry.builder(await generateVoteCommitEntry('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', vote, voter))
             .blockContext({ directoryBlockHeight: 2 })
             .build();
 
@@ -158,19 +167,27 @@ describe('Parse vote', function () {
     });
 
     it('Should parse vote chain', async function () {
-        const initiator = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
+        const initiator = {
+            id: crypto.randomBytes(32),
+            publicKey: '310df171d50ad46f0f5c115520b0fcde4522801de4732589df14b42d5f980818',
+            secretKey: 'd1011e7b33b3bb18c184730530a6b1977ce3ed3c3b66677a276bf326116a885b'
+        };
         const initiatorPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(initiator.secretKey));
 
         const voteDef = require('./data/vote-definition');
-        const voteChainFirstEntry = Entry.builder(generateVoteChain(voteDef, initiator).firstEntry)
+        const voteChainFirstEntry = Entry.builder((await generateVoteChain(voteDef, initiator)).firstEntry)
             .blockContext({ directoryBlockHeight: 1 })
             .build();
 
-        const voter = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
+        const voter = {
+            id: crypto.randomBytes(32),
+            publicKey: 'bea0ba0061046926a18a0811ad7a90c356a9ec4a96ed087abb364dba12dd5525',
+            secretKey: '8514257f1c373550199aa981ff07abd3ecd29a091ed1930eccebd161d54e9642'
+        };
         const voterPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(voter.secretKey));
 
         const vote = require('./data/vote.json');
-        const commitEntry = Entry.builder(generateVoteCommitEntry('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', vote, voter))
+        const commitEntry = Entry.builder(await generateVoteCommitEntry('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', vote, voter))
             .blockContext({ directoryBlockHeight: 2 })
             .build();
         const revealEntry = Entry.builder(generateVoteRevealEntry('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', vote, voter.id))
@@ -231,25 +248,33 @@ describe('Parse vote', function () {
 
     it('Should parse vote', async function () {
 
-        const initiator = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
+        const initiator = {
+            id: crypto.randomBytes(32),
+            publicKey: '310df171d50ad46f0f5c115520b0fcde4522801de4732589df14b42d5f980818',
+            secretKey: 'd1011e7b33b3bb18c184730530a6b1977ce3ed3c3b66677a276bf326116a885b'
+        };
         const initiatorPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(initiator.secretKey));
 
         const initialVoters = [{ voterId: 'ID_1', weight: 22 }, { voterId: 'ID_2' }];
-        const initialVotersEntry = Entry.builder(generateEligibleVotersChain(initialVoters, initiator).firstEntry)
+        const initialVotersEntry = Entry.builder((await generateEligibleVotersChain(initialVoters, initiator)).firstEntry)
             .blockContext({ directoryBlockHeight: 1 })
             .build();
 
         const voteDef = require('./data/vote-definition');
 
-        const voteChainFirstEntry = Entry.builder(generateVoteChain(voteDef, initiator).firstEntry)
+        const voteChainFirstEntry = Entry.builder((await generateVoteChain(voteDef, initiator)).firstEntry)
             .blockContext({ directoryBlockHeight: 1 })
             .build();
 
-        const voter = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
+        const voter = {
+            id: crypto.randomBytes(32),
+            publicKey: 'bea0ba0061046926a18a0811ad7a90c356a9ec4a96ed087abb364dba12dd5525',
+            secretKey: '8514257f1c373550199aa981ff07abd3ecd29a091ed1930eccebd161d54e9642'
+        };
         const voterPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(voter.secretKey));
 
         const vote = require('./data/vote.json');
-        const commitEntry = Entry.builder(generateVoteCommitEntry('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', vote, voter))
+        const commitEntry = Entry.builder(await generateVoteCommitEntry('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', vote, voter))
             .blockContext({ directoryBlockHeight: 2 })
             .build();
         const revealEntry = Entry.builder(generateVoteRevealEntry('7b11a72cd69d3083e4d20137bb569423923a55696017b36f46222e9f83964679', vote, voter.id))
@@ -282,7 +307,6 @@ describe('Parse vote', function () {
         assert.lengthOf(commits, 1);
         assert.lengthOf(reveals, 1);
         assert.lengthOf(eligibleVotersRegitrations, 1);
-
     });
 
     function expectIdentityKeysAtHeightCall(mock, identity, height, key, exactly) {

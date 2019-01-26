@@ -1,8 +1,7 @@
 const { FactomCli, Entry } = require('factom'),
     sinon = require('sinon'),
     crypto = require('crypto'),
-    { keyToSecretIdentityKey, getPublicIdentityKey,
-        walletdIdentityPublicKeysResolver, walletdIdentityPrivateKeyResolver } = require('../src/factom-identity'),
+    { keyToPublicIdentityKey, walletdIdentityPublicKeysResolver, walletdIdentityPrivateKeyResolver } = require('../src/factom-identity'),
     participateVote = require('../src/write-vote/participate-vote'),
     { generateVoteChain } = require('../src/write-vote/create-vote-struct');
 
@@ -23,12 +22,17 @@ describe('Participate vote', function () {
         const cli = new FactomCli();
         const mock = sinon.mock(cli);
         const definition = require('./data/vote-definition');
-        const initiator = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
-        const initiatorPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(initiator.secretKey));
+        const initiator = {
+            id: crypto.randomBytes(32),
+            publicKey: '310df171d50ad46f0f5c115520b0fcde4522801de4732589df14b42d5f980818',
+            secretKey: 'd1011e7b33b3bb18c184730530a6b1977ce3ed3c3b66677a276bf326116a885b'
+        };
+        const initiatorPublicIdentityKey = keyToPublicIdentityKey(initiator.publicKey);
 
-        const firstEntry = Entry.builder(generateVoteChain(definition, initiator).firstEntry)
+        const firstEntry = Entry.builder((await generateVoteChain(definition, initiator)).firstEntry)
             .blockContext({ directoryBlockHeight: 700 })
             .build();
+
         mock.expects('getFirstEntry')
             .withArgs(voteChainId)
             .returns(Promise.resolve(firstEntry));
@@ -79,10 +83,13 @@ describe('Participate vote', function () {
         const cli = new FactomCli();
         const mock = sinon.mock(cli);
         const definition = require('./data/vote-definition');
-        const initiator = { id: crypto.randomBytes(32), secretKey: crypto.randomBytes(32) };
-        const initiatorPublicIdentityKey = getPublicIdentityKey(keyToSecretIdentityKey(initiator.secretKey));
+        const initiator = {
+            id: crypto.randomBytes(32), publicKey: '310df171d50ad46f0f5c115520b0fcde4522801de4732589df14b42d5f980818',
+            secretKey: 'd1011e7b33b3bb18c184730530a6b1977ce3ed3c3b66677a276bf326116a885b'
+        };
+        const initiatorPublicIdentityKey = keyToPublicIdentityKey(initiator.publicKey);
 
-        const firstEntry = Entry.builder(generateVoteChain(definition, initiator).firstEntry)
+        const firstEntry = Entry.builder((await generateVoteChain(definition, initiator)).firstEntry)
             .blockContext({ directoryBlockHeight: 700 })
             .build();
         mock.expects('getFirstEntry')

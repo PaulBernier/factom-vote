@@ -30,12 +30,12 @@ async function createVote(cli, identityResolvers, voteData, ecAddress, skipValid
             }
         }
 
-        const eligibleVotersChain = generateEligibleVotersChain(eligibleVoters || [], initiator);
+        const eligibleVotersChain = await generateEligibleVotersChain(eligibleVoters || [], initiator);
         defCopy.vote.eligibleVotersChainId = eligibleVotersChain.idHex;
         chainsToCreate.push(eligibleVotersChain);
     }
 
-    const voteChain = generateVoteChain(defCopy, initiator);
+    const voteChain = await generateVoteChain(defCopy, initiator);
     chainsToCreate.push(voteChain);
     const registrationEntry = generateVoteRegistrationEntry(registrationChainId, voteChain.id);
     const ecCost = registrationEntry.ecCost() + chainsToCreate.map(c => c.ecCost()).reduce((acc, cur) => acc + cur, 0);
@@ -53,17 +53,19 @@ async function createVote(cli, identityResolvers, voteData, ecAddress, skipValid
 }
 
 async function appendEligibleVoters(cli, privateKeyResolver, appendEligibleVotersData, ecAddress, skipValidation) {
-    const { eligibleVoters, eligibleVotersChainId, identityKey } = appendEligibleVotersData;
+    const { eligibleVoters, eligibleVotersChainId, initiator } = appendEligibleVotersData;
 
-    if (!skipValidation) {
-        const canAppend = await canAppendEligibleVoters(cli, eligibleVotersChainId, identityKey);
+    if (!skipValidation && initiator.key) {
+        const canAppend = await canAppendEligibleVoters(cli, eligibleVotersChainId, initiator.key);
         if (!canAppend) {
             throw new Error(`The initiator secret key is not authorized to add eligible voters to [${eligibleVotersChainId}].`);
         }
     }
 
-    const secretKey = extractKey(await getSecretIdentityKey(privateKeyResolver, identityKey));
-    const entry = generateAppendEligibleVotersEntry(eligibleVoters, eligibleVotersChainId, secretKey);
+    if (typeof initiator.sign !== 'function') {
+        initiator.secretKey = extractKey(await getSecretIdentityKey(privateKeyResolver, initiator.key));
+    }
+    const entry = await generateAppendEligibleVotersEntry(eligibleVoters, eligibleVotersChainId, initiator);
     await validateFunds(cli, entry.ecCost(), ecAddress, 'Cannot append eligible voters');
 
     return cli.add(entry, ecAddress);

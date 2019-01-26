@@ -1,4 +1,5 @@
 const base58 = require('base-58'),
+    sign = require('tweetnacl/nacl-fast').sign,
     { getKeyPair, sha256d } = require('./crypto');
 
 const ID_PUB_PREFIX = Buffer.from('0345ef9de0', 'hex'),
@@ -6,14 +7,33 @@ const ID_PUB_PREFIX = Buffer.from('0345ef9de0', 'hex'),
 const VALID_ID_PREFIXES = new Set(['idpub', 'idsec']);
 
 async function getVoteIdentity(identityResolvers, identity) {
-    await verifyIdentityKeyAssociation(identityResolvers.publicKeysResolver, identity.chainId, identity.key);
+    const publicIdentityKey = getPublicIdentityKey(identity.key);
+    await verifyIdentityKeyAssociation(identityResolvers.publicKeysResolver, identity.chainId, publicIdentityKey);
 
-    const secretKey = extractKey(await getSecretIdentityKey(identityResolvers.privateKeyResolver, identity.key));
+    const publicKey = extractKey(publicIdentityKey);
 
-    return {
+    const result = {
         id: identity.chainId,
-        secretKey: secretKey
+        publicKey
     };
+
+    if (typeof identity.sign !== 'function') {
+        result.secretKey = extractKey(await getSecretIdentityKey(identityResolvers.privateKeyResolver, identity.key));
+    }
+
+    return result;
+}
+
+
+function getSignature(voteIdentity, dataToSign) {
+    if (typeof voteIdentity.sign === 'function') {
+        return voteIdentity.sign(dataToSign);
+    } else if (voteIdentity.secretKey) {
+        const keyPair = getKeyPair(voteIdentity.secretKey);
+        return sign.detached(dataToSign, keyPair.secretKey);
+    } else {
+        throw new Error('Unable to sign data: no resolvable secret key or sign() method');
+    }
 }
 
 async function verifyIdentityKeyAssociation(identityPublicKeysResolver, identityChainId, identityKey, blockHeight) {
@@ -132,5 +152,6 @@ module.exports = {
     keyToSecretIdentityKey,
     verifyIdentityKeyAssociation,
     walletdIdentityPublicKeysResolver,
-    walletdIdentityPrivateKeyResolver
+    walletdIdentityPrivateKeyResolver,
+    getSignature
 };

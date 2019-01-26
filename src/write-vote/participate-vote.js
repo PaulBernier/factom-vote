@@ -13,7 +13,7 @@ async function commitVote(cli, identityResolvers, voteChainId, vote, identity, e
     }
 
     const voter = await getVoteIdentity(identityResolvers, identity);
-    const entry = generateVoteCommitEntry(voteChainId, vote, voter);
+    const entry = await generateVoteCommitEntry(voteChainId, vote, voter);
     validateFunds(cli, entry.ecCost(), ecAddress, 'Cannot commit vote');
 
     return cli.add(entry, ecAddress);
