@@ -17,7 +17,9 @@ async function getVoteIdentity(identityResolvers, identity) {
         publicKey
     };
 
-    if (typeof identity.sign !== 'function') {
+    if (typeof identity.sign === 'function') {
+        result.sign = identity.sign;
+    } else {
         result.secretKey = extractKey(await getSecretIdentityKey(identityResolvers.privateKeyResolver, identity.key));
     }
 

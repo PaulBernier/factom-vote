@@ -60,7 +60,7 @@ describe('Factom digital identities', function () {
         mock.verify();
     });
 
-    it('Should get vote identity', async function () {
+    it('Should get vote identity with secret key', async function () {
         const CHAIN_ID = '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635',
             PUB_KEY = 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz',
             SEC_KEY = 'idsec1wnZ9FLheMDXZNnnDHXdqZcMiDrgg2hTNzdseNLwFnEot362c4';
@@ -85,7 +85,32 @@ describe('Factom digital identities', function () {
 
         mock.verify();
         assert.equal(voteIdentity.id, CHAIN_ID);
+        assert.deepEqual(voteIdentity.publicKey, Buffer.from('c103756200d0c1223c0ee9911196bf06de6ee570b0f45897e2ef39f9abf39d24', 'hex'));
         assert.deepEqual(voteIdentity.secretKey, Buffer.from('67fe571d8cbad2c0d0d10b295301eaf631d43ff82f21c7f161448f220ad22c66', 'hex'));
+    });
+
+
+    it('Should get vote identity with custom signer', async function () {
+        const CHAIN_ID = '2d98021e3cf71580102224b2fcb4c5c60595e8fdf6fd1b97c6ef63e9fb3ed635',
+            PUB_KEY = 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz';
+
+        const cli = new FactomCli();
+        const mock = sinon.mock(cli);
+        mock.expects('walletdApi')
+            .once()
+            .withArgs('active-identity-keys', { chainid: CHAIN_ID, height: undefined })
+            .returns(Promise.resolve({ keys: [PUB_KEY] }));
+
+        const resolvers = {
+            publicKeysResolver: walletdIdentityPublicKeysResolver.bind(null, cli),
+        };
+
+        const voteIdentity = await getVoteIdentity(resolvers, { chainId: CHAIN_ID, key: PUB_KEY, sign() {} });
+
+        mock.verify();
+        assert.equal(voteIdentity.id, CHAIN_ID);
+        assert.deepEqual(voteIdentity.publicKey, Buffer.from('c103756200d0c1223c0ee9911196bf06de6ee570b0f45897e2ef39f9abf39d24', 'hex'));
+        assert.isFunction(voteIdentity.sign);
     });
 
     it('Should accept identity key association at current height', async function () {
