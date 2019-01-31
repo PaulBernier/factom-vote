@@ -37,6 +37,9 @@
                     "type": "string",
                     "minLength": 55,
                     "maxLength": 55
+                },
+                "sign": {
+                    "typeof": "function"
                 }
             }
         }

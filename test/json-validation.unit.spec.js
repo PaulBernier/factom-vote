@@ -1,7 +1,27 @@
-const { validateVoteDefinition, validateVote, validateEligibleVoters } = require('../src/validation/json-validation');
+const { validateVoteDefinition,
+    validateVote,
+    validateEligibleVoters,
+    validateCreateVoteData } = require('../src/validation/json-validation');
 
 
 describe('Validate JSONs', function () {
+
+    it('should validate a complete vote definition JSON with text', function () {
+        const definition = require('./data/vote-definition.json');
+        const createVoteData = {
+            definition,
+            eligibleVoters: [],
+            registrationChainId: '26ebf2960ec150366a8a0d2fd855d94aa350985ccd2c3750204b4fe58296598c',
+            identity: {
+                chainId: '92bdd7c5cbe7c1e6112d62ab8bea87cecb63457940e500229a29f3677feb28a9',
+                key: 'idpub3Doj5fqXye8PkX8w83hzPh3PXbiLhrxTZjT6sXmtFQdDyzwymz',
+                sign: () => 'signed'
+            }
+        };
+        if (!validateCreateVoteData(createVoteData)) {
+            throw new Error(JSON.stringify(validateCreateVoteData.errors, null, 4));
+        }
+    });
 
     it('should validate a complete vote definition JSON with text', function () {
         const voteDef = require('./data/vote-definition.json');
