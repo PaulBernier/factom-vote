@@ -29,7 +29,11 @@ async function getVoteIdentity(identityResolvers, identity) {
 
 function getSignature(voteIdentity, dataToSign) {
     if (typeof voteIdentity.sign === 'function') {
-        return voteIdentity.sign(dataToSign);
+        const signature = Buffer.from(voteIdentity.sign(dataToSign), 'hex');
+        if (!sign.detached.verify(dataToSign, signature, voteIdentity.publicKey)) {
+            throw new Error(`Identity signature does not verify for public key ${voteIdentity.publicKey.toString('hex')}`);
+        }
+        return signature;
     } else if (voteIdentity.secretKey) {
         const keyPair = getKeyPair(voteIdentity.secretKey);
         return sign.detached(dataToSign, keyPair.secretKey);

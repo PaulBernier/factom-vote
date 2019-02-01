@@ -105,7 +105,7 @@ describe('Factom digital identities', function () {
             publicKeysResolver: walletdIdentityPublicKeysResolver.bind(null, cli),
         };
 
-        const voteIdentity = await getVoteIdentity(resolvers, { chainId: CHAIN_ID, key: PUB_KEY, sign() {} });
+        const voteIdentity = await getVoteIdentity(resolvers, { chainId: CHAIN_ID, key: PUB_KEY, sign() { } });
 
         mock.verify();
         assert.equal(voteIdentity.id, CHAIN_ID);
@@ -165,11 +165,14 @@ describe('Factom digital identities', function () {
     });
 
     it('Should sign using custom signer', async function () {
+        const publicKey = Buffer.from('a1597a9808b2be2548d7f29c7fcd884a52916aca4bbe442118044e294c2de971', 'hex');
+        const identity = {
+            publicKey,
+            sign: (data) => sign.detached(data, Buffer.from('11de38af16cfc79c0827d7671b501560bfe4161e1801c6db6a4128aa0013d3ffa1597a9808b2be2548d7f29c7fcd884a52916aca4bbe442118044e294c2de971', 'hex'))
+        };
+        const sig = getSignature(identity, Buffer.from('dummy'));
 
-        const identity = { sign: () => 'custom' };
-        const sig = getSignature(identity, 'dummy');
-
-        assert.equal(sig, 'custom');
+        assert.equal(sig.toString('hex'), 'ce88857fbacb8eaa8afffbc90d2ef9ee79d5b79a80d182942e098bf0feac092ca0630a5e2bfe0d4e6e7eee704fe714db6a010c99f4f1f178f3fbeb430fefc40d');
     });
 
     function expectIdentityKeysAtHeightCall(mock, chainId, height, key, exactly) {
