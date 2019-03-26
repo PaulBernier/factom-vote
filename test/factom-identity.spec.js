@@ -159,7 +159,7 @@ describe('Factom digital identities', function () {
     it('Should sign using private key', async function () {
         const identity = sign.keyPair();
         const message = nacl.randomBytes(32);
-        const sig = getSignature(identity, message);
+        const sig = await getSignature(identity, message);
 
         assert.isTrue(sign.detached.verify(message, sig, identity.publicKey));
     });
@@ -170,7 +170,7 @@ describe('Factom digital identities', function () {
             publicKey,
             sign: (data) => sign.detached(data, Buffer.from('11de38af16cfc79c0827d7671b501560bfe4161e1801c6db6a4128aa0013d3ffa1597a9808b2be2548d7f29c7fcd884a52916aca4bbe442118044e294c2de971', 'hex'))
         };
-        const sig = getSignature(identity, Buffer.from('dummy'));
+        const sig = await getSignature(identity, Buffer.from('dummy'));
 
         assert.equal(sig.toString('hex'), 'ce88857fbacb8eaa8afffbc90d2ef9ee79d5b79a80d182942e098bf0feac092ca0630a5e2bfe0d4e6e7eee704fe714db6a010c99f4f1f178f3fbeb430fefc40d');
     });
