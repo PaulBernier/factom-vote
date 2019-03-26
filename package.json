@@ -28,28 +28,28 @@
     },
     "homepage": "https://github.com/PaulBernier/factom-vote#readme",
     "dependencies": {
-        "ajv": "^6.6.1",
+        "ajv": "^6.10.0",
         "base-58": "0.0.1",
         "bluebird": "^3.5.3",
-        "factom": "1.0.0-rc3",
+        "factom": "1.0.2",
         "hash.js": "^1.1.7",
-        "tweetnacl": "^1.0.0"
+        "tweetnacl": "^1.0.1"
     },
     "devDependencies": {
-        "@babel/core": "^7.2.0",
-        "@babel/plugin-transform-async-to-generator": "^7.2.0",
-        "@babel/plugin-transform-modules-commonjs": "^7.2.0",
-        "@babel/plugin-transform-runtime": "^7.2.0",
-        "@babel/preset-env": "^7.2.0",
-        "@babel/runtime": "^7.2.0",
-        "babel-loader": "^8.0.4",
+        "@babel/core": "^7.4.0",
+        "@babel/plugin-transform-async-to-generator": "^7.4.0",
+        "@babel/plugin-transform-modules-commonjs": "^7.4.0",
+        "@babel/plugin-transform-runtime": "^7.4.0",
+        "@babel/preset-env": "^7.4.2",
+        "@babel/runtime": "^7.4.2",
+        "babel-loader": "^8.0.5",
         "chai": "^4.2.0",
-        "dotenv": "^6.2.0",
-        "eslint": "^5.10.0",
-        "mocha": "^5.2.0",
-        "nyc": "^13.1.0",
-        "sinon": "^7.2.2",
-        "webpack": "^4.27.1",
-        "webpack-cli": "^3.1.2"
+        "dotenv": "^7.0.0",
+        "eslint": "^5.15.3",
+        "mocha": "^6.0.2",
+        "nyc": "^13.3.0",
+        "sinon": "^7.3.0",
+        "webpack": "^4.29.6",
+        "webpack-cli": "^3.3.0"
     }
 }
