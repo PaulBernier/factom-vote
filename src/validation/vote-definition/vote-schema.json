@@ -2,12 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "vote-definition/vote",
     "type": "object",
-    "required": [
-        "phasesBlockHeights",
-        "eligibleVotersChainId",
-        "type",
-        "config"
-    ],
+    "required": ["phasesBlockHeights", "eligibleVotersChainId", "type", "config"],
     "definitions": {
         "weightedUnweighted": {
             "type": "object",
@@ -26,35 +21,55 @@
             }
         },
         "type0": {
-            "if": {
-                "properties": {
-                    "type": {
-                        "const": 0
-                    }
-                }
-            },
-            "then": {
-                "properties": {
-                    "config": {
-                        "properties": {
-                            "options": {
-                                "minItems": 2,
-                                "maxItems": 2
-                            },
-                            "winnerCriteria": {
-                                "properties": {
-                                    "minSupport": {
-                                        "minProperties": 1,
-                                        "maxProperties": 1,
-                                        "propertyNames": {
-                                            "enum": {
-                                                "$data": "3/options"
-                                            }
+            "properties": {
+                "type": {
+                    "const": 0
+                },
+                "config": {
+                    "required": ["computeResultsAgainst", "winnerCriteria"],
+                    "properties": {
+                        "options": {
+                            "minItems": 2,
+                            "maxItems": 2
+                        },
+                        "winnerCriteria": {
+                            "properties": {
+                                "minSupport": {
+                                    "minProperties": 1,
+                                    "maxProperties": 1,
+                                    "propertyNames": {
+                                        "enum": {
+                                            "$data": "3/options"
                                         }
                                     }
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "type1": {
+            "properties": {
+                "type": {
+                    "const": 1
+                },
+                "config": {
+                    "required": ["computeResultsAgainst", "winnerCriteria"]
+                }
+            }
+        },
+        "type2": {
+            "properties": {
+                "type": {
+                    "const": 2
+                },
+                "config": {
+                    "not": {
+                        "anyOf": [
+                            { "required": ["winnerCriteria"] },
+                            { "required": ["computeResultsAgainst"] }
+                        ]
                     }
                 }
             }
@@ -64,11 +79,7 @@
     "properties": {
         "phasesBlockHeights": {
             "type": "object",
-            "required": [
-                "commitStart",
-                "commitEnd",
-                "revealEnd"
-            ],
+            "required": ["commitStart", "commitEnd", "revealEnd"],
             "additionalProperties": false,
             "properties": {
                 "commitStart": {
@@ -94,22 +105,12 @@
             "pattern": "^[0-9a-f]{64}$"
         },
         "type": {
-            "enum": [
-                0,
-                1,
-                2
-            ]
+            "enum": [0, 1, 2]
         },
         "config": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-                "options",
-                "minOptions",
-                "maxOptions",
-                "computeResultsAgainst",
-                "allowAbstention"
-            ],
+            "required": ["options", "minOptions", "maxOptions", "allowAbstention"],
             "properties": {
                 "options": {
                     "type": "array",
@@ -169,10 +170,7 @@
                     }
                 },
                 "computeResultsAgainst": {
-                    "enum": [
-                        "ALL_ELIGIBLE_VOTERS",
-                        "PARTICIPANTS_ONLY"
-                    ]
+                    "enum": ["ALL_ELIGIBLE_VOTERS", "PARTICIPANTS_ONLY"]
                 },
                 "allowAbstention": {
                     "type": "boolean"
@@ -180,9 +178,15 @@
             }
         }
     },
-    "allOf": [
+    "oneOf": [
         {
             "$ref": "#/definitions/type0"
+        },
+        {
+            "$ref": "#/definitions/type1"
+        },
+        {
+            "$ref": "#/definitions/type2"
         }
     ]
 }

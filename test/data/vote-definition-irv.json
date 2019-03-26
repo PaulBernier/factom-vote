@@ -1,0 +1,26 @@
+{
+    "proposal": {
+        "title": "Public test #3 - Approval vote",
+        "text": "Select your approval for Factom Protocol Guide(s)"
+    },
+    "vote": {
+        "phasesBlockHeights": { "commitStart": 71696, "commitEnd": 71983, "revealEnd": 72271 },
+        "eligibleVotersChainId": "23f4ed042c511191dbe8b9062c1b4e595abbf871aa368edd2af7d27b69625ac3",
+        "type": 2,
+        "config": {
+            "options": [
+                "Macgyver",
+                "George Washington",
+                "Napolean",
+                "Jimi Hendrix",
+                "Dr Dre",
+                "Ronald MacDonald",
+                "Buzz Aldrin",
+                "Nero"
+            ],
+            "allowAbstention": true,
+            "minOptions": 1,
+            "maxOptions": 8
+        }
+    }
+}

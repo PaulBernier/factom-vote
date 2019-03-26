@@ -12,10 +12,7 @@
         "eligibleVotersChainId": "c164726970df78e4dc7eedb54aad18b20e6023bf1da7cc98fd0d3eb6d7e00b86",
         "type": 0,
         "config": {
-            "options": [
-                "yes",
-                "no"
-            ],
+            "options": ["yes", "no"],
             "minOptions": 1,
             "maxOptions": 2,
             "acceptanceCriteria": {

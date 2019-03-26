@@ -1,12 +1,12 @@
-const { validateVoteDefinition,
+const {
+    validateVoteDefinition,
     validateVote,
     validateEligibleVoters,
-    validateCreateVoteData } = require('../src/validation/json-validation');
+    validateCreateVoteData
+} = require('../src/validation/json-validation');
 
-
-describe('Validate JSONs', function () {
-
-    it('should validate a complete vote definition JSON with text', function () {
+describe('Validate JSONs', function() {
+    it('should validate a complete vote definition JSON with text', function() {
         const definition = require('./data/vote-definition.json');
         const createVoteData = {
             definition,
@@ -23,45 +23,52 @@ describe('Validate JSONs', function () {
         }
     });
 
-    it('should validate a complete vote definition JSON with text', function () {
+    it('should validate a complete vote definition JSON with text', function() {
         const voteDef = require('./data/vote-definition.json');
         if (!validateVoteDefinition(voteDef)) {
             throw new Error(JSON.stringify(validateVoteDefinition.errors, null, 4));
         }
     });
 
-    it('should validate a complete vote definition JSON with href', function () {
+    it('should validate a complete vote definition JSON with href', function() {
         const voteDef = require('./data/vote-definition.2.json');
         if (!validateVoteDefinition(voteDef)) {
             throw new Error(JSON.stringify(validateVoteDefinition.errors, null, 4));
         }
     });
 
-    it('should validate a minimal vote definition JSON', function () {
+    it('should validate a minimal vote definition JSON', function() {
         const voteDef = require('./data/vote-definition-minimal.json');
         if (!validateVoteDefinition(voteDef)) {
             throw new Error(JSON.stringify(validateVoteDefinition.errors, null, 4));
         }
     });
 
-    it('should validate a vote JSON', function () {
+    it('should validate a vote JSON', function() {
         const vote = require('./data/vote.json');
         if (!validateVote(vote)) {
             throw new Error(JSON.stringify(validateVote.errors, null, 4));
         }
     });
 
-    it('should validate an abstention vote JSON', function () {
+    it('should validate an abstention vote JSON', function() {
         const vote = require('./data/vote-abstention.json');
         if (!validateVote(vote)) {
             throw new Error(JSON.stringify(validateVote.errors, null, 4));
         }
     });
 
-    it('should validate an eligible voters JSON', function () {
+    it('should validate an eligible voters JSON', function() {
         const eligibleVoters = require('./data/eligible-voters.json');
         if (!validateEligibleVoters(eligibleVoters)) {
             throw new Error(JSON.stringify(validateEligibleVoters.errors, null, 4));
+        }
+    });
+
+    it('should validate an IRV vote definition JSON with text', function() {
+        const voteDef = require('./data/vote-definition-irv.json');
+        if (!validateVoteDefinition(voteDef)) {
+            throw new Error(JSON.stringify(validateVoteDefinition.errors, null, 4));
         }
     });
 });
